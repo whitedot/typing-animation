@@ -35,8 +35,13 @@
 
     .hero-track:not(.is-done)::after {
       content: "";
-      @apply ml-1 inline-block h-[1.05em] w-[2px] align-[-0.12em] bg-accent;
+      @apply ml-1 inline-block h-[1.05em] w-[2px] align-[-0.12em];
+      background-color: var(--hero-caret-color, #1d4ed8);
       animation: caret-blink 0.85s steps(1, end) infinite;
+    }
+
+    .hero-typed-group > * + * {
+      margin-top: var(--hero-line-gap, 0.25rem);
     }
 
     .hero-line-delayed {
@@ -145,13 +150,13 @@
 
           <section id="hero-stage" class="ui-card overflow-hidden p-5 sm:p-6">
             <div class="flex items-center justify-between gap-4">
-              <p class="hero-reveal inline-flex rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-bold tracking-[0.12em] text-accent" data-hero-order="0">
+              <p id="hero-badge-text" class="inline-flex rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-bold tracking-[0.12em] text-accent">
                 LIVE TYPING PANEL
               </p>
               <span class="inline-flex size-4 rounded-full border-2 border-positive"></span>
             </div>
 
-            <h2 class="mt-4 space-y-1 font-display text-2xl font-bold leading-tight sm:text-4xl">
+            <h2 id="hero-typed-group" class="hero-typed-group mt-4 font-display text-2xl font-bold leading-tight sm:text-4xl">
               <span id="hero-typed" data-text="Tailwind CSS v4로 만든" class="hero-typed">
                 <span id="hero-typed-track" class="hero-track"></span>
               </span>
@@ -163,15 +168,15 @@
               </span>
             </h2>
 
-            <p class="hero-reveal mt-4 max-w-3xl text-sm leading-relaxed text-muted sm:text-base" data-hero-order="1">
-              `typing-animation-lib.js`와 Tailwind 유틸리티를 결합해 실무형 타이핑 시퀀스를 구현한 데모입니다. 한국어 IME, 뷰포트 트리거, 사용자 상호작용, 접근성 옵션을 프리셋으로 검증할 수 있습니다.
+            <p id="hero-after-text" class="hero-reveal mt-4 max-w-3xl text-sm leading-relaxed text-muted sm:text-base" data-hero-order="1">
+              프리셋과 콘솔 설정을 조합해 타이핑 UX를 실시간으로 비교하고, 실제 서비스에 맞는 연출 값을 빠르게 검증할 수 있습니다.
             </p>
 
             <div class="mt-5 flex flex-wrap gap-2">
-              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="2">Typewriter</span>
-              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="3">Korean IME</span>
-              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="4">Replay Trigger</span>
-              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="5">A11y Skip</span>
+              <span class="rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold">Typewriter</span>
+              <span class="rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold">Korean IME</span>
+              <span class="rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold">Replay Trigger</span>
+              <span class="rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold">A11y Skip</span>
             </div>
 
             <div class="mt-6 grid gap-3 sm:grid-cols-4">
@@ -181,6 +186,66 @@
               <button type="button" data-player-action="skip" class="player-action-btn rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Skip</button>
             </div>
             <p id="player-action-guide" class="mt-2 text-xs font-semibold text-muted">버튼 상태를 계산 중입니다...</p>
+
+            <section id="typing-console" class="mt-4 rounded-2xl border border-divider bg-slate-50/85 p-4">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-xs font-black tracking-[0.1em] text-muted">LIVE CONTROL CONSOLE</p>
+                <button id="console-reset" type="button" class="rounded-lg border border-divider bg-white px-2.5 py-1 text-xs font-semibold transition hover:bg-slate-100">기본값 복원</button>
+              </div>
+              <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85">
+                  <span class="flex items-center justify-between"><span>글자 크기</span><span id="console-font-size-value" class="font-mono">56px</span></span>
+                  <input id="console-font-size" type="range" min="30" max="84" step="1" value="56" class="w-full accent-accent" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85">
+                  <span class="flex items-center justify-between"><span>타이핑 속도</span><span id="console-speed-value" class="font-mono">100%</span></span>
+                  <input id="console-speed" type="range" min="50" max="200" step="5" value="100" class="w-full accent-accent" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85">
+                  <span class="flex items-center justify-between"><span>시작 전 커서 대기</span><span id="console-prestart-value" class="font-mono">380ms</span></span>
+                  <input id="console-prestart" type="range" min="0" max="1200" step="20" value="380" class="w-full accent-accent" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85">
+                  <span>배지 문구</span>
+                  <input id="console-badge-text" type="text" value="LIVE TYPING PANEL" class="h-9 w-full rounded-md border border-divider bg-white px-2 text-xs font-medium" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85">
+                  <span>기본 텍스트 색상</span>
+                  <input id="console-text-color" type="color" value="#111318" class="h-9 w-full cursor-pointer rounded-md border border-divider bg-white p-1" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85">
+                  <span>강조 라인 색상</span>
+                  <input id="console-accent-color" type="color" value="#1d4ed8" class="h-9 w-full cursor-pointer rounded-md border border-divider bg-white p-1" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85">
+                  <span>커서 색상</span>
+                  <input id="console-caret-color" type="color" value="#1d4ed8" class="h-9 w-full cursor-pointer rounded-md border border-divider bg-white p-1" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85 sm:col-span-2 xl:col-span-1">
+                  <span class="flex items-center justify-between"><span>라인 간격</span><span id="console-line-gap-value" class="font-mono">4px</span></span>
+                  <input id="console-line-gap" type="range" min="0" max="24" step="1" value="4" class="w-full accent-accent" />
+                </label>
+                <label class="flex items-center justify-between gap-3 rounded-lg border border-divider bg-white px-3 py-2 text-xs font-semibold text-ink/85 sm:col-span-2 xl:col-span-2">
+                  <span>once 모드에서 수동 재실행 허용</span>
+                  <input id="console-manual-replay" type="checkbox" checked class="size-4 accent-accent" />
+                </label>
+                <label class="flex items-center justify-between gap-3 rounded-lg border border-divider bg-white px-3 py-2 text-xs font-semibold text-ink/85 sm:col-span-2 xl:col-span-2">
+                  <span>라인 폭 고정 (lockLineWidth)</span>
+                  <input id="console-lock-width" type="checkbox" class="size-4 accent-accent" />
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85 sm:col-span-2 xl:col-span-3">
+                  <span>타이핑 애니메이션 문구 (줄바꿈으로 라인 구분, 최대 3줄)</span>
+                  <textarea id="console-typing-lines" rows="3" class="w-full rounded-md border border-divider bg-white px-2 py-1.5 text-xs leading-relaxed" spellcheck="false">Tailwind CSS v4로 만든
+타이핑 애니메이션 예제입니다.
+옵션은 조합해서 확장할 수 있습니다.</textarea>
+                </label>
+                <label class="flex flex-col gap-1.5 text-xs font-semibold text-ink/85 sm:col-span-2 xl:col-span-3">
+                  <span>타이핑 효과 후 나타나는 문구</span>
+                  <textarea id="console-after-text" rows="2" class="w-full rounded-md border border-divider bg-white px-2 py-1.5 text-xs leading-relaxed" spellcheck="false">프리셋과 콘솔 설정을 조합해 타이핑 UX를 실시간으로 비교하고, 실제 서비스에 맞는 연출 값을 빠르게 검증할 수 있습니다.</textarea>
+                </label>
+              </div>
+              <p class="mt-2 text-[11px] text-muted">색상/크기/배지는 즉시 반영되고, 후속 문구는 타이핑 완료 후 노출됩니다. 타이핑 문구/속도/재생 정책은 다음 재생부터 적용됩니다.</p>
+            </section>
 
             <div class="mt-4 border-t border-divider pt-4">
               <p id="preset-status" class="text-sm font-semibold text-ink/80">프리셋 로딩 중...</p>
@@ -221,6 +286,18 @@
               <td class="px-4 py-2 text-ink/80"><code>prefers-reduced-motion</code> 사용자에게 애니메이션 대신 즉시 완성 상태를 보여줍니다.</td>
             </tr>
             <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">lockLineWidth</td>
+              <td class="px-4 py-2 font-mono">boolean</td>
+              <td class="px-4 py-2 font-mono">false(데모 콘솔 기본값)</td>
+              <td class="px-4 py-2 text-ink/80">라인 컨테이너 폭을 텍스트 길이에 맞춰 고정할지 선택합니다. <code>false</code>면 영역 폭을 꽉 채워 표시됩니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">debug</td>
+              <td class="px-4 py-2 font-mono">boolean</td>
+              <td class="px-4 py-2 font-mono">false</td>
+              <td class="px-4 py-2 text-ink/80">구성 누락(잘못된 selector/id 등) 경고를 콘솔에 출력해 통합 디버깅을 쉽게 합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
               <td class="px-4 py-2 font-mono">reveal.selector</td>
               <td class="px-4 py-2 font-mono">string</td>
               <td class="px-4 py-2 font-mono">".hero-reveal"</td>
@@ -251,10 +328,16 @@
               <td class="px-4 py-2 text-ink/80">시작 트리거 대상과 이벤트 타입입니다. 클릭 시작/특정 영역 진입 시작에 사용합니다.</td>
             </tr>
             <tr class="border-t border-ink/10">
-              <td class="px-4 py-2 font-mono">replay.mode / replay.cooldownMs</td>
-              <td class="px-4 py-2 font-mono">"once" | "manual" | "on-visible" / number</td>
+              <td class="px-4 py-2 font-mono">preStartCursorBlinkMs</td>
+              <td class="px-4 py-2 font-mono">number(ms)</td>
+              <td class="px-4 py-2 font-mono">380</td>
+              <td class="px-4 py-2 text-ink/80">재생 시작 전에 커서만 잠깐 깜빡이게 하는 대기 시간입니다. 첫 타이핑 직전 템포를 제어할 수 있습니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">replay.mode / replay.cooldownMs / replay.manualReplayAllowed</td>
+              <td class="px-4 py-2 font-mono">"once" | "manual" | "on-visible" / number / boolean</td>
               <td class="px-4 py-2 font-mono">프리셋별 상이</td>
-              <td class="px-4 py-2 text-ink/80">재생 정책과 최소 재생 간격입니다. 스크롤 재진입 리플레이 제어에 사용합니다.</td>
+              <td class="px-4 py-2 text-ink/80">재생 정책, 쿨다운, <code>once</code> 모드에서 수동 재생 허용 여부를 함께 제어합니다.</td>
             </tr>
             <tr class="border-t border-ink/10">
               <td class="px-4 py-2 font-mono">a11y.skipEnabled / a11y.skipKey / a11y.ariaLive</td>
@@ -273,6 +356,12 @@
               <td class="px-4 py-2 font-mono">object</td>
               <td class="px-4 py-2 font-mono">minDelay, maxDelay, punctuationPause ...</td>
               <td class="px-4 py-2 text-ink/80">타이핑 리듬을 수치로 조정합니다. 테스트 재현성과 UX 톤 튜닝에 유용합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">demoConsole.badgeText / typingLinesText / afterText</td>
+              <td class="px-4 py-2 font-mono">string / string / string</td>
+              <td class="px-4 py-2 font-mono">LIVE CONTROL CONSOLE 입력값</td>
+              <td class="px-4 py-2 text-ink/80">데모 전용 미리보기 제어 항목입니다. 배지(항상 표시), 타이핑 문구, 타이핑 후 문구를 콘솔에서 변경합니다.</td>
             </tr>
           </tbody>
         </table>
@@ -310,6 +399,18 @@
               <td class="px-4 py-2 font-mono">"plain" | "ime-ko" | "instant"</td>
               <td class="px-4 py-2 font-mono">"ime-ko"</td>
               <td class="px-4 py-2 text-ink/80"><code>plain</code>: 일반 타이핑, <code>ime-ko</code>: 한글 조합 프레임 타이핑, <code>instant</code>: 즉시 출력</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">text</td>
+              <td class="px-4 py-2 font-mono">string</td>
+              <td class="px-4 py-2 font-mono">"Tailwind CSS v4로 만든"</td>
+              <td class="px-4 py-2 text-ink/80">라인별 타이핑 문구를 직접 지정합니다. 없으면 컨테이너의 <code>data-text</code>를 기본값으로 사용합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">lockWidth</td>
+              <td class="px-4 py-2 font-mono">boolean</td>
+              <td class="px-4 py-2 font-mono">true / false</td>
+              <td class="px-4 py-2 text-ink/80">해당 라인만 폭 고정을 개별 제어합니다. 지정하지 않으면 전역 <code>lockLineWidth</code>를 따릅니다.</td>
             </tr>
             <tr class="border-t border-ink/10">
               <td class="px-4 py-2 font-mono">delayBefore</td>
@@ -480,8 +581,32 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
         const presetButtons = Array.from(document.querySelectorAll("[data-preset]"));
         const playerActionButtons = Array.from(document.querySelectorAll("[data-player-action]"));
         const revealTargets = Array.from(document.querySelectorAll(".hero-reveal"));
+        const heroTypedGroupEl = document.getElementById("hero-typed-group");
+        const heroBadgeTextEl = document.getElementById("hero-badge-text");
+        const heroAfterTextEl = document.getElementById("hero-after-text");
+        const heroLineEls = ["hero-typed", "hero-typed-second", "hero-typed-third"]
+          .map(function (id) { return document.getElementById(id); })
+          .filter(Boolean);
+        const heroSecondLineEl = document.getElementById("hero-typed-second");
         const delayedTargets = ["hero-typed-second", "hero-typed-third"];
         const trackTargets = ["hero-typed-track", "hero-typed-second-track", "hero-typed-third-track"];
+        const consoleResetEl = document.getElementById("console-reset");
+        const consoleFontSizeEl = document.getElementById("console-font-size");
+        const consoleFontSizeValueEl = document.getElementById("console-font-size-value");
+        const consoleSpeedEl = document.getElementById("console-speed");
+        const consoleSpeedValueEl = document.getElementById("console-speed-value");
+        const consolePrestartEl = document.getElementById("console-prestart");
+        const consolePrestartValueEl = document.getElementById("console-prestart-value");
+        const consoleBadgeTextEl = document.getElementById("console-badge-text");
+        const consoleTypingLinesEl = document.getElementById("console-typing-lines");
+        const consoleAfterTextEl = document.getElementById("console-after-text");
+        const consoleTextColorEl = document.getElementById("console-text-color");
+        const consoleAccentColorEl = document.getElementById("console-accent-color");
+        const consoleCaretColorEl = document.getElementById("console-caret-color");
+        const consoleLineGapEl = document.getElementById("console-line-gap");
+        const consoleLineGapValueEl = document.getElementById("console-line-gap-value");
+        const consoleManualReplayEl = document.getElementById("console-manual-replay");
+        const consoleLockWidthEl = document.getElementById("console-lock-width");
         const actionButtonsByName = playerActionButtons.reduce(function (acc, button) {
           const action = button.getAttribute("data-player-action");
           if (action) acc[action] = button;
@@ -501,7 +626,47 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           CANCELLED: "cancelled",
           DESTROYED: "destroyed"
         };
+        const defaultTypingLinesText = heroLineEls
+          .map(function (el) { return (el && el.dataset && typeof el.dataset.text === "string" ? el.dataset.text : ""); })
+          .filter(function (line) { return line.length > 0; })
+          .join("\n");
+        const consoleDefaults = {
+          fontSizePx: 56,
+          speedPercent: 100,
+          preStartMs: 380,
+          badgeText: heroBadgeTextEl ? heroBadgeTextEl.textContent.trim() : "LIVE TYPING PANEL",
+          typingLinesText: defaultTypingLinesText,
+          afterText: heroAfterTextEl ? heroAfterTextEl.textContent.trim() : "",
+          textColor: "#111318",
+          accentColor: "#1d4ed8",
+          caretColor: "#1d4ed8",
+          lineGapPx: 4,
+          manualReplayAllowed: true,
+          lockLineWidth: false
+        };
+        const paceDelayDefaults = {
+          minDelay: 34,
+          maxDelay: 220,
+          baseDefault: 48,
+          baseIme: 52,
+          rangeDefault: 22,
+          rangeIme: 28,
+          jitter: 16,
+          emptyPause: 18,
+          punctuationPause: 120,
+          imeVowelDelta: -8,
+          imeConsonantDelta: 6,
+          imeCommitPause: 42,
+          imeCarryPause: 26,
+          imeComposeShiftPause: 14,
+          imeComposeStartPause: 8,
+          imeComposeEndPause: 12,
+          imeWaveAmount: 4,
+          imeMinDelay: 34
+        };
+        const signedPaceKeys = new Set(["imeVowelDelta", "jamoDelta"]);
         let currentPresetMeta = null;
+        let currentPresetName = "default";
 
         function setStatus(message) {
           if (presetStatusEl) presetStatusEl.textContent = message;
@@ -512,6 +677,139 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           const codeEl = presetCodeEl.querySelector("code");
           if (!codeEl) return;
           codeEl.textContent = message;
+        }
+
+        function readNumberInput(el, fallback) {
+          if (!el) return fallback;
+          const value = Number(el.value);
+          return Number.isFinite(value) ? value : fallback;
+        }
+
+        function readTextInput(el, fallback) {
+          if (!el || typeof el.value !== "string") return fallback;
+          return el.value;
+        }
+
+        function parseTypingLines(rawText) {
+          if (typeof rawText !== "string") return [];
+          return rawText
+            .replace(/\r/g, "")
+            .split("\n")
+            .map(function (line) { return line.trim(); })
+            .filter(function (line) { return line.length > 0; })
+            .slice(0, 3);
+        }
+
+        function getConsoleSettings() {
+          return {
+            fontSizePx: readNumberInput(consoleFontSizeEl, consoleDefaults.fontSizePx),
+            speedPercent: readNumberInput(consoleSpeedEl, consoleDefaults.speedPercent),
+            preStartMs: readNumberInput(consolePrestartEl, consoleDefaults.preStartMs),
+            badgeText: readTextInput(consoleBadgeTextEl, consoleDefaults.badgeText).trim(),
+            typingLinesText: readTextInput(consoleTypingLinesEl, consoleDefaults.typingLinesText),
+            afterText: readTextInput(consoleAfterTextEl, consoleDefaults.afterText).trim(),
+            textColor: consoleTextColorEl && consoleTextColorEl.value ? consoleTextColorEl.value : consoleDefaults.textColor,
+            accentColor: consoleAccentColorEl && consoleAccentColorEl.value ? consoleAccentColorEl.value : consoleDefaults.accentColor,
+            caretColor: consoleCaretColorEl && consoleCaretColorEl.value ? consoleCaretColorEl.value : consoleDefaults.caretColor,
+            lineGapPx: readNumberInput(consoleLineGapEl, consoleDefaults.lineGapPx),
+            manualReplayAllowed: !!(consoleManualReplayEl && consoleManualReplayEl.checked),
+            lockLineWidth: !!(consoleLockWidthEl && consoleLockWidthEl.checked)
+          };
+        }
+
+        function setConsoleSettings(settings) {
+          if (consoleFontSizeEl) consoleFontSizeEl.value = String(settings.fontSizePx);
+          if (consoleSpeedEl) consoleSpeedEl.value = String(settings.speedPercent);
+          if (consolePrestartEl) consolePrestartEl.value = String(settings.preStartMs);
+          if (consoleBadgeTextEl) consoleBadgeTextEl.value = settings.badgeText;
+          if (consoleTypingLinesEl) consoleTypingLinesEl.value = settings.typingLinesText;
+          if (consoleAfterTextEl) consoleAfterTextEl.value = settings.afterText;
+          if (consoleTextColorEl) consoleTextColorEl.value = settings.textColor;
+          if (consoleAccentColorEl) consoleAccentColorEl.value = settings.accentColor;
+          if (consoleCaretColorEl) consoleCaretColorEl.value = settings.caretColor;
+          if (consoleLineGapEl) consoleLineGapEl.value = String(settings.lineGapPx);
+          if (consoleManualReplayEl) consoleManualReplayEl.checked = !!settings.manualReplayAllowed;
+          if (consoleLockWidthEl) consoleLockWidthEl.checked = !!settings.lockLineWidth;
+        }
+
+        function syncConsoleValueLabels() {
+          const settings = getConsoleSettings();
+          if (consoleFontSizeValueEl) consoleFontSizeValueEl.textContent = Math.round(settings.fontSizePx) + "px";
+          if (consoleSpeedValueEl) consoleSpeedValueEl.textContent = Math.round(settings.speedPercent) + "%";
+          if (consolePrestartValueEl) consolePrestartValueEl.textContent = Math.round(settings.preStartMs) + "ms";
+          if (consoleLineGapValueEl) consoleLineGapValueEl.textContent = Math.round(settings.lineGapPx) + "px";
+        }
+
+        function applyConsoleVisualSettings() {
+          const settings = getConsoleSettings();
+          const typingLines = parseTypingLines(settings.typingLinesText);
+          heroLineEls.forEach(function (el) {
+            el.style.fontSize = Math.round(settings.fontSizePx) + "px";
+            el.style.lineHeight = "1.2";
+            el.style.color = settings.textColor;
+          });
+          if (heroSecondLineEl) heroSecondLineEl.style.color = settings.accentColor;
+          heroLineEls.forEach(function (el, idx) {
+            if (!el || !el.dataset) return;
+            if (typingLines[idx]) el.dataset.text = typingLines[idx];
+          });
+          if (heroBadgeTextEl) heroBadgeTextEl.textContent = settings.badgeText;
+          if (heroAfterTextEl) heroAfterTextEl.textContent = settings.afterText;
+          if (heroTypedGroupEl) heroTypedGroupEl.style.setProperty("--hero-line-gap", Math.round(settings.lineGapPx) + "px");
+          document.documentElement.style.setProperty("--hero-caret-color", settings.caretColor);
+        }
+
+        function scaleDelay(value, factor, allowNegative) {
+          const n = Number(value);
+          if (!Number.isFinite(n)) return value;
+          const scaled = Math.round(n * factor);
+          if (allowNegative) return scaled;
+          return Math.max(0, scaled);
+        }
+
+        function applyConsoleRuntimeOverrides(config) {
+          const settings = getConsoleSettings();
+          const speedSafe = Math.max(10, settings.speedPercent);
+          const delayScale = 100 / speedSafe;
+          const typingLines = parseTypingLines(settings.typingLinesText);
+
+          config.preStartCursorBlinkMs = Math.max(0, Math.round(settings.preStartMs));
+          config.lockLineWidth = !!settings.lockLineWidth;
+          config.replay = Object.assign({}, config.replay || {}, {
+            manualReplayAllowed: settings.manualReplayAllowed
+          });
+
+          config.startDelay = scaleDelay(config.startDelay, delayScale);
+          config.betweenDelay = scaleDelay(config.betweenDelay, delayScale);
+          config.afterSecondDelay = scaleDelay(config.afterSecondDelay, delayScale);
+
+          if (config.reveal && typeof config.reveal === "object") {
+            config.reveal.baseDelay = scaleDelay(config.reveal.baseDelay, delayScale);
+            config.reveal.step = scaleDelay(config.reveal.step, delayScale);
+          }
+
+          const paceSource = config.pace && typeof config.pace === "object" ? config.pace : {};
+          const nextPace = Object.assign({}, paceSource);
+          Object.keys(paceDelayDefaults).forEach(function (key) {
+            const baseValue = Number.isFinite(Number(paceSource[key])) ? Number(paceSource[key]) : paceDelayDefaults[key];
+            nextPace[key] = scaleDelay(baseValue, delayScale, signedPaceKeys.has(key));
+          });
+          config.pace = nextPace;
+
+          if (Array.isArray(config.lines)) {
+            config.lines = config.lines.map(function (line) {
+              const nextLine = Object.assign({}, line);
+              nextLine.delayBefore = scaleDelay(nextLine.delayBefore, delayScale);
+              nextLine.delayAfter = scaleDelay(nextLine.delayAfter, delayScale);
+              return nextLine;
+            });
+            config.lines = config.lines.map(function (line, idx) {
+              if (!typingLines[idx]) return line;
+              return Object.assign({}, line, { text: typingLines[idx] });
+            });
+          }
+
+          return config;
         }
 
         function setActionGuide(message) {
@@ -526,19 +824,26 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           button.setAttribute("aria-disabled", enabled ? "false" : "true");
         }
 
-        function getPlayerStatus() {
+        function getPlayerState() {
           const player = window.demoTypingPlayer;
           if (!player || typeof player.getState !== "function") return null;
-          const state = player.getState();
-          return state && state.status ? state.status : null;
+          return player.getState();
         }
 
         function syncActionUi() {
-          const status = getPlayerStatus();
+          const state = getPlayerState();
+          const status = state && state.status ? state.status : null;
           const replayMode = currentPresetMeta && currentPresetMeta.replayMode ? currentPresetMeta.replayMode : "once";
           const cooldownMs = currentPresetMeta && Number.isFinite(currentPresetMeta.cooldownMs) ? currentPresetMeta.cooldownMs : 0;
+          const manualReplayAllowed = currentPresetMeta && typeof currentPresetMeta.manualReplayAllowed === "boolean"
+            ? currentPresetMeta.manualReplayAllowed
+            : true;
           const triggerMode = currentPresetMeta && currentPresetMeta.startTrigger ? currentPresetMeta.startTrigger : "immediate";
           const manualStart = currentPresetMeta && currentPresetMeta.autoStart === false;
+          const remainingCooldownMs = state && Number.isFinite(state.remainingCooldownMs) ? state.remainingCooldownMs : 0;
+          const canPlayManual = state && typeof state.canPlayManual === "boolean"
+            ? state.canPlayManual
+            : (replayMode !== "once" || manualReplayAllowed);
 
           setActionEnabled("play", false);
           setActionEnabled("pause", false);
@@ -551,7 +856,7 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           }
 
           if (status === playerStatus.IDLE) {
-            setActionEnabled("play", true);
+            setActionEnabled("play", canPlayManual);
             if (manualStart) {
               setActionGuide("현재는 시작 전 대기 상태입니다. Play로 시작할 수 있습니다.");
               return;
@@ -583,14 +888,21 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           }
 
           if (status === playerStatus.COMPLETED || status === playerStatus.CANCELLED) {
-            const canReplay = replayMode !== "once";
-            setActionEnabled("play", canReplay);
-            if (!canReplay) {
-              setActionGuide("완료 상태입니다. 현재 프리셋은 1회 재생 정책이라 Play 재실행이 제한됩니다.");
+            setActionEnabled("play", canPlayManual);
+            if (!canPlayManual) {
+              if (replayMode === "once" && !manualReplayAllowed) {
+                setActionGuide("완료 상태입니다. 현재 프리셋은 1회 재생 정책이며 수동 재실행이 비활성화되어 있습니다.");
+                return;
+              }
+              if (remainingCooldownMs > 0) {
+                setActionGuide("완료 상태입니다. 쿨다운 중이라 Play를 잠시 사용할 수 없습니다. (" + remainingCooldownMs + "ms 남음)");
+                return;
+              }
+              setActionGuide("완료 상태입니다. 현재 정책에서는 Play 재실행이 제한됩니다.");
               return;
             }
-            if (cooldownMs > 0) {
-              setActionGuide("완료 상태입니다. Play로 재실행할 수 있지만 쿨다운(" + cooldownMs + "ms) 중이면 잠시 후 다시 시도하세요.");
+            if (cooldownMs > 0 && remainingCooldownMs > 0) {
+              setActionGuide("완료 상태입니다. Play로 재실행할 수 있지만 쿨다운 중입니다. (" + remainingCooldownMs + "ms 남음)");
               return;
             }
             setActionGuide("완료 상태입니다. Play로 다시 실행할 수 있습니다.");
@@ -663,6 +975,7 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
             code: `const demoConfig = {
   pauseWhenHidden: true,
   reducedMotionBehavior: "instant",
+  preStartCursorBlinkMs: 380,
   reveal: { selector: ".hero-reveal", baseDelay: 90, step: 160 },
   lines: [
     { containerId: "hero-typed", trackId: "hero-typed-track", strategy: "plain", delayBefore: 260, delayAfter: 680 },
@@ -673,6 +986,7 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
               return {
                 pauseWhenHidden: true,
                 reducedMotionBehavior: "instant",
+                preStartCursorBlinkMs: 380,
                 reveal: {
                   selector: ".hero-reveal",
                   baseDelay: 90,
@@ -958,19 +1272,25 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
         }
 
         function applyPreset(name) {
-          const selected = presets[name] || presets["default"];
+          const resolvedName = presets[name] ? name : "default";
+          currentPresetName = resolvedName;
+          const selected = presets[resolvedName];
           destroyCurrentPlayer();
           resetHeroDom();
           setCode(selected.code);
-          setActivePresetButton(name);
+          setActivePresetButton(resolvedName);
 
-          const config = selected.createConfig();
+          const config = applyConsoleRuntimeOverrides(selected.createConfig());
+          applyConsoleVisualSettings();
           currentPresetMeta = {
             label: selected.label,
             autoStart: config.autoStart,
             startTrigger: config.startTrigger || "immediate",
             replayMode: config.replay && config.replay.mode ? config.replay.mode : "once",
-            cooldownMs: config.replay && typeof config.replay.cooldownMs === "number" ? config.replay.cooldownMs : 0
+            cooldownMs: config.replay && typeof config.replay.cooldownMs === "number" ? config.replay.cooldownMs : 0,
+            manualReplayAllowed: config.replay && typeof config.replay.manualReplayAllowed === "boolean"
+              ? config.replay.manualReplayAllowed
+              : true
           };
           window.demoTypingPlayer = window.TypingAnimationLib.create(config);
           syncActionUi();
@@ -1028,6 +1348,89 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           });
         });
 
+        if (consoleFontSizeEl) {
+          consoleFontSizeEl.addEventListener("input", function () {
+            syncConsoleValueLabels();
+            applyConsoleVisualSettings();
+          });
+        }
+        if (consoleTextColorEl) {
+          consoleTextColorEl.addEventListener("input", function () {
+            applyConsoleVisualSettings();
+          });
+        }
+        if (consoleAccentColorEl) {
+          consoleAccentColorEl.addEventListener("input", function () {
+            applyConsoleVisualSettings();
+          });
+        }
+        if (consoleCaretColorEl) {
+          consoleCaretColorEl.addEventListener("input", function () {
+            applyConsoleVisualSettings();
+          });
+        }
+        if (consoleLineGapEl) {
+          consoleLineGapEl.addEventListener("input", function () {
+            syncConsoleValueLabels();
+            applyConsoleVisualSettings();
+          });
+        }
+        if (consoleSpeedEl) {
+          consoleSpeedEl.addEventListener("input", function () {
+            syncConsoleValueLabels();
+          });
+          consoleSpeedEl.addEventListener("change", function () {
+            applyPreset(currentPresetName);
+          });
+        }
+        if (consolePrestartEl) {
+          consolePrestartEl.addEventListener("input", function () {
+            syncConsoleValueLabels();
+          });
+          consolePrestartEl.addEventListener("change", function () {
+            applyPreset(currentPresetName);
+          });
+        }
+        if (consoleBadgeTextEl) {
+          consoleBadgeTextEl.addEventListener("input", function () {
+            applyConsoleVisualSettings();
+          });
+        }
+        if (consoleAfterTextEl) {
+          consoleAfterTextEl.addEventListener("input", function () {
+            applyConsoleVisualSettings();
+          });
+        }
+        if (consoleTypingLinesEl) {
+          consoleTypingLinesEl.addEventListener("input", function () {
+            applyConsoleVisualSettings();
+          });
+          consoleTypingLinesEl.addEventListener("change", function () {
+            applyPreset(currentPresetName);
+          });
+        }
+        if (consoleManualReplayEl) {
+          consoleManualReplayEl.addEventListener("change", function () {
+            applyPreset(currentPresetName);
+          });
+        }
+        if (consoleLockWidthEl) {
+          consoleLockWidthEl.addEventListener("change", function () {
+            applyPreset(currentPresetName);
+          });
+        }
+        if (consoleResetEl) {
+          consoleResetEl.addEventListener("click", function () {
+            setConsoleSettings(consoleDefaults);
+            syncConsoleValueLabels();
+            applyConsoleVisualSettings();
+            applyPreset(currentPresetName);
+          });
+        }
+
+        setConsoleSettings(consoleDefaults);
+        syncConsoleValueLabels();
+        applyConsoleVisualSettings();
         applyPreset("default");
       }
     });

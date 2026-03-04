@@ -12,6 +12,7 @@
         secondFallbackText: '오랜만이에요, 그누7!',
         firstWidthPadding: 4,
         secondWidthPadding: 4,
+        lockLineWidth: true,
         startDelay: 260,
         betweenDelay: 680,
         afterSecondDelay: 1000,
@@ -30,8 +31,10 @@
         a11y: null,
         interaction: null,
         pace: null,
+        preStartCursorBlinkMs: 0,
         hooks: null,
-        randomFn: null
+        randomFn: null,
+        debug: false
     });
 
     const STATUS = Object.freeze({
@@ -134,6 +137,38 @@
         };
     }
 
+    function logDebugWarning(options, code, message, details) {
+        if (!options || !options.debug) return;
+        if (!global.console || typeof global.console.warn !== 'function') return;
+        if (details == null) {
+            global.console.warn('[TypingAnimationLib][' + code + '] ' + message);
+            return;
+        }
+        global.console.warn('[TypingAnimationLib][' + code + '] ' + message, details);
+    }
+
+    function notifyConfigError(options, code, message, details) {
+        const hooks = options && options.hooks && typeof options.hooks === 'object' ? options.hooks : {};
+        const onError = typeof options.onError === 'function'
+            ? options.onError
+            : (typeof hooks.onError === 'function' ? hooks.onError : null);
+        const payload = {
+            code: code,
+            message: message,
+            details: details || null
+        };
+
+        if (onError) {
+            try {
+                onError(payload);
+            } catch (error) {
+                // ignore hook errors
+            }
+        }
+
+        logDebugWarning(options, code, message, details);
+    }
+
     function createScheduler(timerHost) {
         let paused = false;
         let cancelled = false;
@@ -209,7 +244,7 @@
         };
     }
 
-    function normalizeLines(doc, options) {
+    function normalizeLines(doc, options, reportIssue) {
         if (Array.isArray(options.lines) && options.lines.length > 0) {
             const lines = [];
             for (let idx = 0; idx < options.lines.length; idx += 1) {
@@ -219,13 +254,32 @@
                     input.container || input.containerEl || input.el || input.selector,
                     input.containerId || input.id || null
                 );
-                if (!containerEl) continue;
+                if (!containerEl) {
+                    if (typeof reportIssue === 'function') {
+                        reportIssue('LINE_CONTAINER_NOT_FOUND', 'Line container element was not found.', {
+                            lineIndex: idx,
+                            container: input.container || input.containerEl || input.el || input.selector || null,
+                            containerId: input.containerId || input.id || null
+                        });
+                    }
+                    continue;
+                }
 
                 let trackEl = resolveElement(doc, input.track || input.trackEl, input.trackId || null);
                 if (!trackEl && typeof input.trackSelector === 'string') {
                     trackEl = containerEl.querySelector(input.trackSelector);
                 }
-                if (!trackEl) continue;
+                if (!trackEl) {
+                    if (typeof reportIssue === 'function') {
+                        reportIssue('LINE_TRACK_NOT_FOUND', 'Line track element was not found.', {
+                            lineIndex: idx,
+                            track: input.track || input.trackEl || null,
+                            trackId: input.trackId || null,
+                            trackSelector: input.trackSelector || null
+                        });
+                    }
+                    continue;
+                }
 
                 const dataText = containerEl.dataset.text || '';
                 const fallbackByIndex = idx === 0 ? options.firstFallbackText : idx === 1 ? options.secondFallbackText : '';
@@ -249,6 +303,7 @@
                     doneClass: String(input.doneClass || 'is-done'),
                     activateClass: typeof input.activateClass === 'string' ? input.activateClass : '',
                     activateTargetEl: activateTargetEl,
+                    lockWidth: typeof input.lockWidth === 'boolean' ? input.lockWidth : null,
                     delayBefore: toOptionalNumber(input.delayBefore),
                     delayAfter: toOptionalNumber(input.delayAfter)
                 });
@@ -272,7 +327,17 @@
         const typedSecondEl = doc.getElementById(options.typedSecondId);
         const typedTrack = doc.getElementById(options.typedTrackId);
         const typedSecondTrack = doc.getElementById(options.typedSecondTrackId);
-        if (!typedEl || !typedTrack || !typedSecondEl || !typedSecondTrack) return null;
+        if (!typedEl || !typedTrack || !typedSecondEl || !typedSecondTrack) {
+            if (typeof reportIssue === 'function') {
+                reportIssue('LEGACY_TARGET_NOT_FOUND', 'Legacy target elements were not found.', {
+                    typedId: options.typedId,
+                    typedSecondId: options.typedSecondId,
+                    typedTrackId: options.typedTrackId,
+                    typedSecondTrackId: options.typedSecondTrackId
+                });
+            }
+            return null;
+        }
 
         const firstText = typedEl.dataset.text || options.firstFallbackText;
         const secondText = typedSecondEl.dataset.text || options.secondFallbackText;
@@ -288,6 +353,7 @@
                 doneClass: 'is-done',
                 activateClass: '',
                 activateTargetEl: typedEl,
+                lockWidth: null,
                 delayBefore: toNumber(options.startDelay, 260),
                 delayAfter: toNumber(options.betweenDelay, 680)
             },
@@ -301,6 +367,7 @@
                 doneClass: 'is-done',
                 activateClass: 'is-active',
                 activateTargetEl: typedSecondEl,
+                lockWidth: null,
                 delayBefore: 0,
                 delayAfter: toNumber(options.afterSecondDelay, 1000)
             }
@@ -740,9 +807,29 @@
         const options = Object.assign({}, DEFAULT_OPTIONS, userOptions || {});
         const doc = global.document;
         if (!doc) return null;
+        const configWarnings = [];
+        const lines = normalizeLines(doc, options, function (code, message, details) {
+            configWarnings.push({
+                code: code,
+                message: message,
+                details: details || null
+            });
+        });
+        if (!lines || lines.length === 0) {
+            notifyConfigError(
+                options,
+                'NO_VALID_LINES',
+                'No valid typing lines were resolved. Check container/track selectors and IDs.',
+                { warnings: configWarnings }
+            );
+            return null;
+        }
 
-        const lines = normalizeLines(doc, options);
-        if (!lines || lines.length === 0) return null;
+        if (configWarnings.length > 0) {
+            configWarnings.forEach(function (item) {
+                logDebugWarning(options, item.code, item.message, item.details);
+            });
+        }
 
         const reveal = normalizeReveal(doc, options);
         const emit = createEmitter(options);
@@ -761,7 +848,9 @@
         const replayMode = toLowerSafe(replayConfig.mode, 'once');
         const replayCooldownMs = Math.max(0, toNumber(replayConfig.cooldownMs, 0));
         const replayMaxCount = toOptionalNumber(replayConfig.maxCount);
+        const replayManualAllowed = replayConfig.manualReplayAllowed == null ? true : !!replayConfig.manualReplayAllowed;
         const replayInViewThreshold = clamp01(toNumber(replayConfig.inViewThreshold, 0.15));
+        const preStartCursorBlinkMs = Math.max(0, toNumber(options.preStartCursorBlinkMs, 0));
         const a11ySkipEnabled = !!a11yConfig.skipEnabled;
         const a11ySkipKey = toLowerSafe(a11yConfig.skipKey, 'escape');
         const a11yAriaLive = toLowerSafe(a11yConfig.ariaLive, 'off');
@@ -794,7 +883,15 @@
         let player = null;
 
         lines.forEach(function (line) {
-            setFixedWidth(doc, line.containerEl, line.text, line.widthPadding);
+            const shouldLockWidth = line.lockWidth == null
+                ? options.lockLineWidth !== false
+                : !!line.lockWidth;
+            if (shouldLockWidth) {
+                setFixedWidth(doc, line.containerEl, line.text, line.widthPadding);
+            } else {
+                line.containerEl.style.width = '';
+                line.containerEl.style.maxWidth = '100%';
+            }
             if (a11yAriaLive !== 'off') {
                 line.trackEl.setAttribute('aria-live', a11yAriaLive);
                 line.trackEl.setAttribute('aria-atomic', 'true');
@@ -845,9 +942,17 @@
             if (source === 'auto') {
                 if (replayMode === 'manual' && playCount > 0) return false;
                 if (replayMode === 'once' && playCount > 0) return false;
+            } else if (source === 'manual') {
+                if (replayMode === 'once' && playCount > 0 && !replayManualAllowed) return false;
             }
 
             return true;
+        }
+
+        function getRemainingCooldownMs() {
+            if (playCount === 0 || replayCooldownMs <= 0 || lastCompleteAt <= 0) return 0;
+            const elapsed = Date.now() - lastCompleteAt;
+            return Math.max(0, replayCooldownMs - elapsed);
         }
 
         function bindVisibility() {
@@ -1038,6 +1143,11 @@
                 return { ok: true, reducedMotion: true };
             }
 
+            if (preStartCursorBlinkMs > 0) {
+                const keepGoing = await scheduler.sleep(preStartCursorBlinkMs);
+                if (!keepGoing) return { ok: false };
+            }
+
             for (let idx = 0; idx < lines.length; idx += 1) {
                 if (activeToken !== runToken || scheduler.isCancelled()) return { ok: false };
 
@@ -1149,6 +1259,12 @@
             return true;
         }
 
+        function canPlay(source) {
+            if (destroyed) return false;
+            if (status === STATUS.RUNNING || status === STATUS.PAUSED) return true;
+            return canStartByPolicy(source === 'auto' ? 'auto' : 'manual');
+        }
+
         function pause(fromVisibility, fromHover) {
             if (destroyed || status !== STATUS.RUNNING) return false;
             scheduler.pause();
@@ -1228,7 +1344,13 @@
                 isCancelled: scheduler.isCancelled(),
                 destroyed: destroyed,
                 playCount: playCount,
-                lastStartSource: lastStartSource
+                lastStartSource: lastStartSource,
+                replayMode: replayMode,
+                replayManualAllowed: replayManualAllowed,
+                replayCooldownMs: replayCooldownMs,
+                remainingCooldownMs: getRemainingCooldownMs(),
+                canPlayManual: canPlay('manual'),
+                canPlayAuto: canPlay('auto')
             };
         }
 
@@ -1236,6 +1358,7 @@
             version: VERSION,
             options: options,
             play: play,
+            canPlay: canPlay,
             pause: pause,
             resume: resume,
             cancel: cancel,
