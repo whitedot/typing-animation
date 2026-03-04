@@ -19,7 +19,9 @@
     }
 
     .hero-track {
-      @apply relative inline-block min-h-[1em] align-baseline;
+      @apply relative inline-block max-w-full min-h-[1em] align-baseline whitespace-normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .hero-track:not(.is-done)::after {
@@ -48,6 +50,10 @@
       @apply translate-y-0 opacity-100;
     }
 
+    #hero-stage.is-hovering {
+      @apply ring-2 ring-accent/45;
+    }
+
     @keyframes caret-blink {
       0%,
       45% {
@@ -63,7 +69,7 @@
 </head>
 <body class="min-h-screen bg-[radial-gradient(circle_at_top_left,_#fefce8_0%,_#f6f3eb_38%,_#eaf4ff_100%)] text-ink antialiased">
   <main class="mx-auto flex min-h-screen max-w-5xl flex-col justify-center gap-6 px-6 py-14">
-    <section class="w-full rounded-3xl border border-ink/10 bg-card/90 p-8 shadow-[0_18px_65px_-40px_rgba(16,42,67,0.45)] backdrop-blur sm:p-12">
+    <section id="hero-stage" class="w-full overflow-hidden rounded-3xl border border-ink/10 bg-card/90 p-8 shadow-[0_18px_65px_-40px_rgba(16,42,67,0.45)] backdrop-blur sm:p-12">
       <p class="hero-reveal mb-4 inline-flex rounded-full border border-accent/20 bg-accent-soft/55 px-3 py-1 text-xs font-semibold tracking-[0.15em] text-accent" data-hero-order="0">
         TAILWIND CSS V4
       </p>
@@ -95,6 +101,8 @@
         <button type="button" data-preset="instant" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">즉시 출력</button>
         <button type="button" data-preset="three-line" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">3줄 혼합</button>
         <button type="button" data-preset="manual" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">수동 시작</button>
+        <button type="button" data-preset="in-view-replay" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">뷰포트 리플레이</button>
+        <button type="button" data-preset="interaction-ux" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">인터랙션 UX</button>
       </div>
 
       <div class="mt-3 flex flex-wrap gap-2">
@@ -105,6 +113,7 @@
       </div>
 
       <p id="preset-status" class="mt-3 text-xs font-medium text-ink/70">프리셋 로딩 중...</p>
+      <p class="mt-1 text-[11px] text-ink/60">접근성 프리셋에서는 <kbd class="rounded border border-ink/20 bg-white px-1.5 py-0.5 font-semibold">Esc</kbd> 로 Skip 가능합니다.</p>
     </section>
 
     <section class="w-full rounded-3xl border border-ink/10 bg-white/85 p-6 shadow-[0_18px_65px_-45px_rgba(16,42,67,0.45)] sm:p-8">
@@ -154,6 +163,42 @@
               <td class="px-4 py-2 font-mono">number(ms)</td>
               <td class="px-4 py-2 font-mono">160</td>
               <td class="px-4 py-2 text-ink/80">대상 간 리빌 간격입니다. <code>data-hero-order</code>와 함께 순차 노출됩니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">startTrigger</td>
+              <td class="px-4 py-2 font-mono">"immediate" | "in-view" | "interaction"</td>
+              <td class="px-4 py-2 font-mono">프리셋별 상이</td>
+              <td class="px-4 py-2 text-ink/80">애니메이션 시작 조건입니다. 즉시/뷰포트 진입/사용자 이벤트 기반 시작을 선택합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">startTriggerTarget / startTriggerEvent</td>
+              <td class="px-4 py-2 font-mono">string / string</td>
+              <td class="px-4 py-2 font-mono">"#hero-stage" 또는 "#hero-typed" / "click"</td>
+              <td class="px-4 py-2 text-ink/80">시작 트리거 대상과 이벤트 타입입니다. 클릭 시작/특정 영역 진입 시작에 사용합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">replay.mode / replay.cooldownMs</td>
+              <td class="px-4 py-2 font-mono">"once" | "manual" | "on-visible" / number</td>
+              <td class="px-4 py-2 font-mono">프리셋별 상이</td>
+              <td class="px-4 py-2 text-ink/80">재생 정책과 최소 재생 간격입니다. 스크롤 재진입 리플레이 제어에 사용합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">a11y.skipEnabled / a11y.skipKey / a11y.ariaLive</td>
+              <td class="px-4 py-2 font-mono">boolean / string / string</td>
+              <td class="px-4 py-2 font-mono">true / "Escape" / "polite"</td>
+              <td class="px-4 py-2 text-ink/80">키보드 Skip과 스크린리더 알림 강도를 설정합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">interaction.*</td>
+              <td class="px-4 py-2 font-mono">object</td>
+              <td class="px-4 py-2 font-mono">pauseOnHover, clickToSkip, clickToReplay</td>
+              <td class="px-4 py-2 text-ink/80">호버 일시정지/클릭 스킵/클릭 리플레이 등 상호작용 기반 제어를 제공합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">pace.*</td>
+              <td class="px-4 py-2 font-mono">object</td>
+              <td class="px-4 py-2 font-mono">minDelay, maxDelay, punctuationPause ...</td>
+              <td class="px-4 py-2 text-ink/80">타이핑 리듬을 수치로 조정합니다. 테스트 재현성과 UX 톤 튜닝에 유용합니다.</td>
             </tr>
           </tbody>
         </table>
@@ -261,6 +306,22 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
             <p class="font-semibold">수동 시작 모드</p>
             <p class="mt-1 text-ink/75"><code>autoStart: false</code> 후 <code>player.play()</code> 호출로 인터랙션 트리거 시작.</p>
           </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">뷰포트 시작 + 재진입 리플레이</p>
+            <p class="mt-1 text-ink/75"><code>startTrigger: "in-view"</code>, <code>replay.mode: "on-visible"</code> 조합으로 스크롤 맥락형 재생.</p>
+          </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">인터랙션 제어</p>
+            <p class="mt-1 text-ink/75"><code>interaction.pauseOnHover</code>, <code>clickToSkip</code>, <code>clickToReplay</code>로 사용자 주도 제어.</p>
+          </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">접근성 제어</p>
+            <p class="mt-1 text-ink/75"><code>a11y.skipEnabled</code>, <code>a11y.skipKey</code>, <code>a11y.ariaLive</code>로 키보드/스크린리더 대응.</p>
+          </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">리듬 튜닝</p>
+            <p class="mt-1 text-ink/75"><code>pace.minDelay/maxDelay/punctuationPause</code>로 타이핑 템포를 브랜드 톤에 맞춰 조정.</p>
+          </div>
           <div class="rounded-xl border border-ink/10 bg-ink/5 p-3 sm:col-span-2">
             <p class="font-semibold">이벤트 훅</p>
             <p class="mt-1 text-ink/75"><code>hooks.onLineStep</code>, <code>hooks.onComplete</code>로 진행률/로깅/분석 이벤트를 연결.</p>
@@ -321,8 +382,9 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
 
         function buildHooks(label) {
           return {
-            onPlay: function () {
-              setStatus("[" + label + "] 재생 중");
+            onPlay: function (payload) {
+              const source = payload && payload.source ? payload.source : "manual";
+              setStatus("[" + label + "] 재생 중 (" + source + ")");
             },
             onPause: function () {
               setStatus("[" + label + "] 일시정지");
@@ -510,6 +572,122 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
                 ]
               };
             }
+          },
+          "in-view-replay": {
+            label: "뷰포트 리플레이",
+            code: `const demoConfig = {
+  startTrigger: "in-view",
+  startTriggerTarget: "#hero-stage",
+  replay: { mode: "on-visible", cooldownMs: 1200, inViewThreshold: 0.3 },
+  pace: { minDelay: 30, maxDelay: 120, punctuationPause: 90 },
+  lines: [
+    { containerId: "hero-typed", trackId: "hero-typed-track", text: "뷰포트 진입 시 시작합니다.", strategy: "plain", delayBefore: 80, delayAfter: 220 },
+    { containerId: "hero-typed-second", trackId: "hero-typed-second-track", text: "화면 재진입 시 쿨다운 이후 자동 재생됩니다.", strategy: "ime-ko", activateClass: "is-active", delayAfter: 850 }
+  ]
+};`,
+            createConfig: function () {
+              return {
+                startTrigger: "in-view",
+                startTriggerTarget: "#hero-stage",
+                replay: {
+                  mode: "on-visible",
+                  cooldownMs: 1200,
+                  inViewThreshold: 0.3
+                },
+                pace: {
+                  minDelay: 30,
+                  maxDelay: 120,
+                  punctuationPause: 90
+                },
+                reveal: {
+                  selector: ".hero-reveal",
+                  baseDelay: 70,
+                  step: 100
+                },
+                hooks: buildHooks("뷰포트 리플레이"),
+                lines: [
+                  {
+                    containerId: "hero-typed",
+                    trackId: "hero-typed-track",
+                    text: "뷰포트 진입 시 시작합니다.",
+                    strategy: "plain",
+                    delayBefore: 80,
+                    delayAfter: 220
+                  },
+                  {
+                    containerId: "hero-typed-second",
+                    trackId: "hero-typed-second-track",
+                    text: "화면 재진입 시 쿨다운 이후 자동 재생됩니다.",
+                    strategy: "ime-ko",
+                    activateClass: "is-active",
+                    delayAfter: 850
+                  }
+                ]
+              };
+            }
+          },
+          "interaction-ux": {
+            label: "인터랙션 UX",
+            code: `const demoConfig = {
+  startTrigger: "interaction",
+  startTriggerTarget: "#hero-typed",
+  startTriggerEvent: "click",
+  interaction: {
+    target: "#hero-stage",
+    pauseOnHover: true,
+    clickToSkip: true,
+    clickToReplay: true,
+    hoverClass: "is-hovering"
+  },
+  a11y: { skipEnabled: true, skipKey: "Escape", ariaLive: "polite" },
+  replay: { mode: "manual", cooldownMs: 0 },
+  lines: [
+    { containerId: "hero-typed", trackId: "hero-typed-track", text: "카드를 클릭하면 시작됩니다.", strategy: "plain", delayBefore: 0, delayAfter: 250 },
+    { containerId: "hero-typed-second", trackId: "hero-typed-second-track", text: "호버 일시정지 + 클릭 스킵/리플레이 + Esc Skip", strategy: "plain", activateClass: "is-active", delayAfter: 800 }
+  ]
+};`,
+            createConfig: function () {
+              return {
+                startTrigger: "interaction",
+                startTriggerTarget: "#hero-typed",
+                startTriggerEvent: "click",
+                interaction: {
+                  target: "#hero-stage",
+                  pauseOnHover: true,
+                  clickToSkip: true,
+                  clickToReplay: true,
+                  hoverClass: "is-hovering"
+                },
+                a11y: {
+                  skipEnabled: true,
+                  skipKey: "Escape",
+                  ariaLive: "polite"
+                },
+                replay: {
+                  mode: "manual",
+                  cooldownMs: 0
+                },
+                hooks: buildHooks("인터랙션 UX"),
+                lines: [
+                  {
+                    containerId: "hero-typed",
+                    trackId: "hero-typed-track",
+                    text: "카드를 클릭하면 시작됩니다.",
+                    strategy: "plain",
+                    delayBefore: 0,
+                    delayAfter: 250
+                  },
+                  {
+                    containerId: "hero-typed-second",
+                    trackId: "hero-typed-second-track",
+                    text: "호버 일시정지 + 클릭 스킵/리플레이 + Esc Skip",
+                    strategy: "plain",
+                    activateClass: "is-active",
+                    delayAfter: 800
+                  }
+                ]
+              };
+            }
           }
         };
 
@@ -539,6 +717,16 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
 
           if (config.autoStart === false) {
             setStatus("[" + selected.label + "] 준비 완료. Play 버튼을 눌러 시작하세요.");
+            return;
+          }
+
+          if (config.startTrigger === "interaction") {
+            setStatus("[" + selected.label + "] 대기 중: 카드 영역 클릭 시 시작");
+            return;
+          }
+
+          if (config.startTrigger === "in-view") {
+            setStatus("[" + selected.label + "] 대기 중: 뷰포트 진입 시 시작 (재진입 리플레이 가능)");
             return;
           }
 

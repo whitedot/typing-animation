@@ -1,7 +1,7 @@
 (function (global) {
     'use strict';
 
-    const VERSION = '1.1.0';
+    const VERSION = '1.2.0';
     const DEFAULT_OPTIONS = Object.freeze({
         typedId: 'hero-typed',
         typedSecondId: 'hero-typed-second',
@@ -20,9 +20,16 @@
         imeBeatPattern: [0.88, 1.06, 0.82, 1.12, 0.94, 1.03],
         lines: null,
         autoStart: true,
+        startTrigger: 'immediate',
+        startTriggerTarget: null,
+        startTriggerEvent: 'click',
         pauseWhenHidden: true,
         reducedMotionBehavior: 'instant',
         composeClassName: 'hero-compose-box',
+        replay: null,
+        a11y: null,
+        interaction: null,
+        pace: null,
         hooks: null,
         randomFn: null
     });
@@ -60,6 +67,11 @@
         return -(Math.cos(Math.PI * x) - 1) / 2;
     }
 
+    function toLowerSafe(value, fallback) {
+        if (value == null) return fallback;
+        return String(value).toLowerCase();
+    }
+
     function resolveElement(doc, ref, fallbackId) {
         if (ref && ref.nodeType === 1) return ref;
         if (typeof ref === 'string') {
@@ -81,7 +93,14 @@
         measure.style.pointerEvents = 'none';
         measure.textContent = text;
         container.parentNode.appendChild(measure);
-        container.style.width = Math.ceil(measure.getBoundingClientRect().width + extraWidth) + 'px';
+        const measuredWidth = Math.ceil(measure.getBoundingClientRect().width + extraWidth);
+        const parentWidth = container.parentNode.getBoundingClientRect
+            ? Math.floor(container.parentNode.getBoundingClientRect().width)
+            : measuredWidth;
+        const clampedWidth = Math.min(measuredWidth, Math.max(0, parentWidth));
+
+        container.style.maxWidth = '100%';
+        container.style.width = clampedWidth + 'px';
         measure.remove();
     }
 
@@ -328,27 +347,42 @@
 
     function createTypeDelayGetter(options) {
         const randomFn = typeof options.randomFn === 'function' ? options.randomFn : Math.random;
+        const pace = options.pace && typeof options.pace === 'object' ? options.pace : {};
+
+        const minDelay = toNumber(pace.minDelay, 34);
+        const maxDelay = toNumber(pace.maxDelay, 220);
+        const baseDefault = toNumber(pace.baseDefault, 48);
+        const baseIme = toNumber(pace.baseIme, 52);
+        const rangeDefault = toNumber(pace.rangeDefault, 22);
+        const rangeIme = toNumber(pace.rangeIme, 28);
+        const jitter = toNumber(pace.jitter, 16);
+        const emptyPause = toNumber(pace.emptyPause, 18);
+        const spaceMultiplier = toNumber(pace.spaceMultiplier, 0.62);
+        const punctuationPause = toNumber(pace.punctuationPause, 120);
+        const jamoDelta = toNumber(pace.jamoDelta, -8);
+        const waveAmount = toNumber(pace.waveAmount, 6);
 
         return function getTypeDelay(char, progress, lane) {
             const p = clamp01(progress || 0);
             const eased = easeInOutSine(p);
             const edgeWeight = Math.abs(eased - 0.5) * 2;
-            const laneBase = lane === 'ime' ? 52 : 48;
-            const laneRange = lane === 'ime' ? 28 : 22;
-            let delay = laneBase + edgeWeight * laneRange + Math.floor(randomFn() * 16);
+            const laneBase = lane === 'ime' ? baseIme : baseDefault;
+            const laneRange = lane === 'ime' ? rangeIme : rangeDefault;
+            let delay = laneBase + edgeWeight * laneRange + Math.floor(randomFn() * jitter);
 
             if (!char) {
-                delay += 18;
+                delay += emptyPause;
             } else if (char === ' ') {
-                delay *= 0.62;
+                delay *= spaceMultiplier;
             } else if (/[,.!?]/.test(char)) {
-                delay += 120;
+                delay += punctuationPause;
             } else if (/^[ㄱ-ㅎㅏ-ㅣ]$/.test(char)) {
-                delay -= 8;
+                delay += jamoDelta;
             }
 
-            delay += Math.sin(p * Math.PI * 4 + 0.8) * 6;
-            return Math.max(34, Math.round(delay));
+            delay += Math.sin(p * Math.PI * 4 + 0.8) * waveAmount;
+            const clamped = Math.max(minDelay, Math.round(delay));
+            return Math.min(maxDelay, clamped);
         };
     }
 
@@ -571,6 +605,17 @@
     }
 
     function createImeDelayGetter(options, getTypeDelay) {
+        const pace = options.pace && typeof options.pace === 'object' ? options.pace : {};
+        const imeVowelDelta = toNumber(pace.imeVowelDelta, -8);
+        const imeConsonantDelta = toNumber(pace.imeConsonantDelta, 6);
+        const imeCommitPause = toNumber(pace.imeCommitPause, 42);
+        const imeCarryPause = toNumber(pace.imeCarryPause, 26);
+        const imeComposeShiftPause = toNumber(pace.imeComposeShiftPause, 14);
+        const imeComposeStartPause = toNumber(pace.imeComposeStartPause, 8);
+        const imeComposeEndPause = toNumber(pace.imeComposeEndPause, 12);
+        const imeWaveAmount = toNumber(pace.imeWaveAmount, 4);
+        const imeMinDelay = toNumber(pace.imeMinDelay, 34);
+
         return function getImeDelay(frame, index, totalFrames) {
             const progress = index / totalFrames;
             const lastChar = (frame.composing || frame.committed || '').slice(-1);
@@ -581,16 +626,16 @@
             let delay = getTypeDelay(lastChar, progress, 'ime');
             delay *= beatPattern[index % beatPattern.length];
 
-            if (frame.keyType === 'vowel') delay -= 8;
-            if (frame.keyType === 'consonant') delay += 6;
-            if (frame.action === 'commit') delay += 42;
-            else if (frame.action === 'carry') delay += 26;
-            else if (frame.action === 'compose-shift') delay += 14;
-            else if (frame.action === 'compose-start') delay += 8;
-            else if (frame.action === 'compose-end') delay += 12;
+            if (frame.keyType === 'vowel') delay += imeVowelDelta;
+            if (frame.keyType === 'consonant') delay += imeConsonantDelta;
+            if (frame.action === 'commit') delay += imeCommitPause;
+            else if (frame.action === 'carry') delay += imeCarryPause;
+            else if (frame.action === 'compose-shift') delay += imeComposeShiftPause;
+            else if (frame.action === 'compose-start') delay += imeComposeStartPause;
+            else if (frame.action === 'compose-end') delay += imeComposeEndPause;
 
-            delay += Math.sin(index * 0.9 + 0.35) * 4;
-            return Math.max(34, Math.round(delay));
+            delay += Math.sin(index * 0.9 + 0.35) * imeWaveAmount;
+            return Math.max(imeMinDelay, Math.round(delay));
         };
     }
 
@@ -707,17 +752,53 @@
         const reducedMotionMql = typeof global.matchMedia === 'function'
             ? global.matchMedia('(prefers-reduced-motion: reduce)')
             : null;
+        const replayConfig = options.replay && typeof options.replay === 'object' ? options.replay : {};
+        const a11yConfig = options.a11y && typeof options.a11y === 'object' ? options.a11y : {};
+        const interactionConfig = options.interaction && typeof options.interaction === 'object' ? options.interaction : {};
+        const startTriggerMode = toLowerSafe(options.startTrigger, 'immediate');
+        const startTriggerEvent = String(options.startTriggerEvent || 'click');
+        const startTarget = resolveElement(doc, options.startTriggerTarget, null) || lines[0].containerEl;
+        const replayMode = toLowerSafe(replayConfig.mode, 'once');
+        const replayCooldownMs = Math.max(0, toNumber(replayConfig.cooldownMs, 0));
+        const replayMaxCount = toOptionalNumber(replayConfig.maxCount);
+        const replayInViewThreshold = clamp01(toNumber(replayConfig.inViewThreshold, 0.15));
+        const a11ySkipEnabled = !!a11yConfig.skipEnabled;
+        const a11ySkipKey = toLowerSafe(a11yConfig.skipKey, 'escape');
+        const a11yAriaLive = toLowerSafe(a11yConfig.ariaLive, 'off');
+        const interactionTarget = resolveElement(doc, interactionConfig.target, null) || startTarget;
+        const interactionPauseOnHover = !!interactionConfig.pauseOnHover;
+        const interactionClickToSkip = !!interactionConfig.clickToSkip;
+        const interactionClickToReplay = !!interactionConfig.clickToReplay;
+        const interactionHoverClass = typeof interactionConfig.hoverClass === 'string'
+            ? interactionConfig.hoverClass
+            : '';
 
         let status = STATUS.IDLE;
         let currentLineIndex = -1;
         let destroyed = false;
         let autoPausedByVisibility = false;
+        let autoPausedByHover = false;
         let visibilityHandler = null;
+        let keyHandler = null;
+        let hoverInHandler = null;
+        let hoverOutHandler = null;
+        let interactionClickHandler = null;
+        let startEventTarget = null;
+        let startEventHandler = null;
+        let viewObserver = null;
         let runToken = 0;
+        let playCount = 0;
+        let lastCompleteAt = 0;
+        let lastStartAt = 0;
+        let lastStartSource = 'manual';
         let player = null;
 
         lines.forEach(function (line) {
             setFixedWidth(doc, line.containerEl, line.text, line.widthPadding);
+            if (a11yAriaLive !== 'off') {
+                line.trackEl.setAttribute('aria-live', a11yAriaLive);
+                line.trackEl.setAttribute('aria-atomic', 'true');
+            }
         });
 
         function setStatus(nextStatus) {
@@ -753,11 +834,27 @@
             });
         }
 
+        function canStartByPolicy(source) {
+            if (replayMaxCount != null && playCount >= replayMaxCount) return false;
+
+            if (playCount > 0 && replayCooldownMs > 0) {
+                const elapsed = Date.now() - lastCompleteAt;
+                if (elapsed < replayCooldownMs) return false;
+            }
+
+            if (source === 'auto') {
+                if (replayMode === 'manual' && playCount > 0) return false;
+                if (replayMode === 'once' && playCount > 0) return false;
+            }
+
+            return true;
+        }
+
         function bindVisibility() {
             if (!options.pauseWhenHidden || visibilityHandler || typeof doc.addEventListener !== 'function') return;
             visibilityHandler = function () {
                 if (doc.hidden) {
-                    if (status === STATUS.RUNNING) player.pause(true);
+                    if (status === STATUS.RUNNING) player.pause(true, false);
                     return;
                 }
                 if (status === STATUS.PAUSED && autoPausedByVisibility) {
@@ -772,6 +869,145 @@
             if (!visibilityHandler || typeof doc.removeEventListener !== 'function') return;
             doc.removeEventListener('visibilitychange', visibilityHandler);
             visibilityHandler = null;
+        }
+
+        function bindKeyboardControl() {
+            if (!a11ySkipEnabled || keyHandler || typeof doc.addEventListener !== 'function') return;
+            keyHandler = function (event) {
+                const key = toLowerSafe(event.key, '');
+                const code = toLowerSafe(event.code, '');
+                const isEscAlias = a11ySkipKey === 'escape' && (key === 'esc' || code === 'esc');
+                const isMatch = key === a11ySkipKey || code === a11ySkipKey || isEscAlias;
+                if (!isMatch) return;
+                if (status !== STATUS.RUNNING && status !== STATUS.PAUSED) return;
+
+                event.preventDefault();
+                player.skip();
+            };
+            doc.addEventListener('keydown', keyHandler);
+        }
+
+        function unbindKeyboardControl() {
+            if (!keyHandler || typeof doc.removeEventListener !== 'function') return;
+            doc.removeEventListener('keydown', keyHandler);
+            keyHandler = null;
+        }
+
+        function bindInteractionControl() {
+            if (!interactionTarget || typeof interactionTarget.addEventListener !== 'function') return;
+
+            if (interactionPauseOnHover && !hoverInHandler && !hoverOutHandler) {
+                hoverInHandler = function () {
+                    if (interactionHoverClass) interactionTarget.classList.add(interactionHoverClass);
+                    if (status !== STATUS.RUNNING) return;
+                    autoPausedByHover = true;
+                    player.pause(false, true);
+                };
+                hoverOutHandler = function () {
+                    if (interactionHoverClass) interactionTarget.classList.remove(interactionHoverClass);
+                    if (status === STATUS.PAUSED && autoPausedByHover) {
+                        autoPausedByHover = false;
+                        player.resume();
+                    }
+                };
+
+                interactionTarget.addEventListener('mouseenter', hoverInHandler);
+                interactionTarget.addEventListener('mouseleave', hoverOutHandler);
+            }
+
+            if ((interactionClickToSkip || interactionClickToReplay) && !interactionClickHandler) {
+                interactionClickHandler = function () {
+                    if (interactionClickToSkip && status === STATUS.RUNNING) {
+                        if (Date.now() - lastStartAt < 180) return;
+                        player.skip();
+                        return;
+                    }
+
+                    if (!interactionClickToReplay) return;
+                    if (status === STATUS.COMPLETED || status === STATUS.CANCELLED) {
+                        player.play();
+                    }
+                };
+                interactionTarget.addEventListener('click', interactionClickHandler);
+            }
+        }
+
+        function unbindInteractionControl() {
+            if (!interactionTarget || typeof interactionTarget.removeEventListener !== 'function') return;
+
+            if (hoverInHandler) {
+                interactionTarget.removeEventListener('mouseenter', hoverInHandler);
+                hoverInHandler = null;
+            }
+            if (hoverOutHandler) {
+                interactionTarget.removeEventListener('mouseleave', hoverOutHandler);
+                hoverOutHandler = null;
+            }
+            if (interactionClickHandler) {
+                interactionTarget.removeEventListener('click', interactionClickHandler);
+                interactionClickHandler = null;
+            }
+        }
+
+        function bindStartInteractionTrigger() {
+            if (startTriggerMode !== 'interaction' || options.autoStart === false) return;
+            if (startEventHandler) return;
+            if (!startTarget || typeof startTarget.addEventListener !== 'function') return;
+
+            startEventTarget = startTarget;
+            startEventHandler = function () {
+                startEventHandler = null;
+                startEventTarget = null;
+                player.play(true);
+            };
+            startEventTarget.addEventListener(startTriggerEvent, startEventHandler, { once: true });
+        }
+
+        function unbindStartInteractionTrigger() {
+            if (!startEventTarget || !startEventHandler) return;
+            startEventTarget.removeEventListener(startTriggerEvent, startEventHandler);
+            startEventTarget = null;
+            startEventHandler = null;
+        }
+
+        function bindViewObserver() {
+            const needsObserver = startTriggerMode === 'in-view' || replayMode === 'on-visible';
+            if (!needsObserver) return;
+            if (viewObserver || !startTarget) return;
+
+            if (typeof global.IntersectionObserver !== 'function') {
+                if (options.autoStart !== false && startTriggerMode === 'in-view') {
+                    player.play(true);
+                }
+                return;
+            }
+
+            viewObserver = new global.IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (!entry.isIntersecting) return;
+
+                    if (status === STATUS.IDLE && options.autoStart !== false && startTriggerMode === 'in-view') {
+                        player.play(true);
+                        if (replayMode !== 'on-visible' && viewObserver) {
+                            viewObserver.disconnect();
+                            viewObserver = null;
+                        }
+                        return;
+                    }
+
+                    if (replayMode === 'on-visible' && (status === STATUS.COMPLETED || status === STATUS.CANCELLED)) {
+                        player.play(true);
+                    }
+                });
+            }, { threshold: replayInViewThreshold });
+
+            viewObserver.observe(startTarget);
+        }
+
+        function unbindViewObserver() {
+            if (!viewObserver) return;
+            viewObserver.disconnect();
+            viewObserver = null;
         }
 
         async function runReveal() {
@@ -855,22 +1091,32 @@
             return { ok: true, reducedMotion: false };
         }
 
-        function play() {
+        function play(isAuto) {
+            const source = isAuto ? 'auto' : 'manual';
             if (destroyed) return false;
             if (status === STATUS.RUNNING) return true;
             if (status === STATUS.PAUSED) return resume();
+            if (!canStartByPolicy(source)) return false;
 
             runToken += 1;
             const activeToken = runToken;
 
             scheduler.reset();
             autoPausedByVisibility = false;
+            autoPausedByHover = false;
             currentLineIndex = -1;
             clearDom();
             bindVisibility();
+            lastStartSource = source;
+            lastStartAt = Date.now();
+            playCount += 1;
 
             setStatus(STATUS.RUNNING);
-            emit('onPlay', { player: player });
+            emit('onPlay', {
+                player: player,
+                source: source,
+                playCount: playCount
+            });
 
             runSequence(activeToken).then(function (result) {
                 if (activeToken !== runToken) return;
@@ -878,10 +1124,13 @@
 
                 if (result.ok) {
                     setStatus(STATUS.COMPLETED);
+                    lastCompleteAt = Date.now();
                     emit('onComplete', {
                         player: player,
                         reducedMotion: !!result.reducedMotion,
-                        skipped: false
+                        skipped: false,
+                        source: lastStartSource,
+                        playCount: playCount
                     });
                     return;
                 }
@@ -900,18 +1149,24 @@
             return true;
         }
 
-        function pause(fromVisibility) {
+        function pause(fromVisibility, fromHover) {
             if (destroyed || status !== STATUS.RUNNING) return false;
             scheduler.pause();
             autoPausedByVisibility = !!fromVisibility;
+            autoPausedByHover = !!fromHover;
             setStatus(STATUS.PAUSED);
-            emit('onPause', { player: player, byVisibility: autoPausedByVisibility });
+            emit('onPause', {
+                player: player,
+                byVisibility: autoPausedByVisibility,
+                byHover: autoPausedByHover
+            });
             return true;
         }
 
         function resume() {
             if (destroyed || status !== STATUS.PAUSED) return false;
             autoPausedByVisibility = false;
+            autoPausedByHover = false;
             scheduler.resume();
             setStatus(STATUS.RUNNING);
             emit('onResume', { player: player });
@@ -924,6 +1179,8 @@
             runToken += 1;
             scheduler.cancel();
             unbindVisibility();
+            autoPausedByHover = false;
+            autoPausedByVisibility = false;
             setStatus(STATUS.CANCELLED);
             emit('onCancel', { player: player, reason: reason || 'manual-cancel' });
             return true;
@@ -935,9 +1192,18 @@
             runToken += 1;
             scheduler.cancel();
             unbindVisibility();
+            autoPausedByHover = false;
+            autoPausedByVisibility = false;
             finalizeDom();
             setStatus(STATUS.COMPLETED);
-            emit('onComplete', { player: player, reducedMotion: false, skipped: true });
+            lastCompleteAt = Date.now();
+            emit('onComplete', {
+                player: player,
+                reducedMotion: false,
+                skipped: true,
+                source: lastStartSource,
+                playCount: playCount
+            });
             return true;
         }
 
@@ -946,6 +1212,10 @@
             runToken += 1;
             scheduler.cancel();
             unbindVisibility();
+            unbindKeyboardControl();
+            unbindInteractionControl();
+            unbindStartInteractionTrigger();
+            unbindViewObserver();
             destroyed = true;
             setStatus(STATUS.DESTROYED);
         }
@@ -956,7 +1226,9 @@
                 currentLineIndex: currentLineIndex,
                 isPaused: scheduler.isPaused(),
                 isCancelled: scheduler.isCancelled(),
-                destroyed: destroyed
+                destroyed: destroyed,
+                playCount: playCount,
+                lastStartSource: lastStartSource
             };
         }
 
@@ -974,9 +1246,17 @@
         };
 
         emit('onInit', { player: player });
+        bindKeyboardControl();
+        bindInteractionControl();
+        bindViewObserver();
+        bindStartInteractionTrigger();
 
         if (options.autoStart !== false) {
-            player.play();
+            if (startTriggerMode === 'immediate') {
+                player.play(true);
+            } else if (startTriggerMode !== 'in-view' && startTriggerMode !== 'interaction') {
+                player.play(true);
+            }
         }
 
         return player;
