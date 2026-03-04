@@ -3,30 +3,39 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tailwind v4 Typing Animation Demo</title>
+  <title>Tailwind v4 Typing Animation Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <style type="text/tailwindcss">
     @theme {
-      --color-paper: #f6f3eb;
-      --color-ink: #102a43;
-      --color-accent: #0f766e;
-      --color-accent-soft: #99f6e4;
-      --color-card: #fffef8;
+      --font-sans: "Manrope", sans-serif;
+      --font-display: "Space Grotesk", sans-serif;
+      --color-page: #d9d9db;
+      --color-shell: #f4f5f7;
+      --color-panel: #ffffff;
+      --color-ink: #111318;
+      --color-muted: #6b7280;
+      --color-accent: #1d4ed8;
+      --color-positive: #059669;
+      --color-warning: #ef4444;
+      --color-divider: #e5e7eb;
     }
 
     .hero-typed {
-      @apply relative inline-block whitespace-nowrap;
+      @apply relative block max-w-full;
     }
 
     .hero-track {
-      @apply relative inline-block max-w-full min-h-[1em] align-baseline whitespace-normal;
+      @apply relative inline max-w-full min-h-[1em] align-baseline whitespace-normal;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
 
     .hero-track:not(.is-done)::after {
       content: "";
-      @apply ml-1 inline-block h-[1.05em] w-[2px] align-[-0.1em] bg-accent;
+      @apply ml-1 inline-block h-[1.05em] w-[2px] align-[-0.12em] bg-accent;
       animation: caret-blink 0.85s steps(1, end) infinite;
     }
 
@@ -39,11 +48,11 @@
     }
 
     .hero-compose-box {
-      @apply rounded bg-accent-soft/80 px-0.5 text-ink;
+      @apply rounded bg-accent/14 px-0.5 text-ink;
     }
 
     .hero-reveal {
-      @apply translate-y-4 opacity-0 transition-all duration-500;
+      @apply translate-y-3 opacity-0 transition-all duration-500;
     }
 
     .hero-reveal.is-visible {
@@ -51,12 +60,24 @@
     }
 
     #hero-stage.is-hovering {
-      @apply ring-2 ring-accent/45;
+      @apply ring-2 ring-accent/40;
+    }
+
+    .ui-card {
+      @apply rounded-2xl border border-divider bg-panel shadow-[0_18px_46px_-34px_rgba(0,0,0,0.42)];
+    }
+
+    .manual-link {
+      @apply flex items-start gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-divider hover:bg-slate-50;
+    }
+
+    .manual-dot {
+      @apply mt-1 inline-block size-2 rounded-full bg-accent;
     }
 
     @keyframes caret-blink {
       0%,
-      45% {
+      44% {
         opacity: 1;
       }
 
@@ -67,71 +88,168 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-[radial-gradient(circle_at_top_left,_#fefce8_0%,_#f6f3eb_38%,_#eaf4ff_100%)] text-ink antialiased">
-  <main class="mx-auto flex min-h-screen max-w-5xl flex-col justify-center gap-6 px-6 py-14">
-    <section id="hero-stage" class="w-full overflow-hidden rounded-3xl border border-ink/10 bg-card/90 p-8 shadow-[0_18px_65px_-40px_rgba(16,42,67,0.45)] backdrop-blur sm:p-12">
-      <p class="hero-reveal mb-4 inline-flex rounded-full border border-accent/20 bg-accent-soft/55 px-3 py-1 text-xs font-semibold tracking-[0.15em] text-accent" data-hero-order="0">
-        TAILWIND CSS V4
-      </p>
+<body class="min-h-screen bg-page text-ink antialiased">
+  <div class="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-10">
+    <div class="overflow-hidden rounded-[34px] border border-black/5 bg-shell shadow-[0_30px_70px_-38px_rgba(0,0,0,0.58)]">
+      <div class="grid min-h-[88vh] lg:grid-cols-[72px_320px_minmax(0,1fr)]">
+        <aside class="border-b border-divider bg-slate-50/75 px-3 py-4 lg:border-b-0 lg:border-r">
+          <div class="flex items-center justify-between lg:flex-col lg:justify-start lg:gap-4">
+            <button class="rounded-xl border border-divider bg-panel p-2 text-ink transition hover:bg-slate-100" aria-label="새 프로젝트">
+              <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14" /></svg>
+            </button>
+            <div class="flex gap-2 lg:flex-col">
+              <button class="rounded-xl border border-divider bg-panel p-2 text-ink transition hover:bg-slate-100" aria-label="홈">
+                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11 12 4l8 7v9h-6v-6H10v6H4z" /></svg>
+              </button>
+              <button class="rounded-xl border border-divider bg-slate-900 p-2 text-white" aria-label="레이어">
+                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5M3 18l9 5 9-5" /></svg>
+              </button>
+              <button class="rounded-xl border border-divider bg-panel p-2 text-ink transition hover:bg-slate-100" aria-label="프로필">
+                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 20c1.8-3.8 5-5.7 8-5.7S18.2 16.2 20 20" /></svg>
+              </button>
+            </div>
+            <div class="hidden lg:flex lg:flex-col lg:items-center lg:gap-4 lg:pt-40">
+              <span class="size-3 rounded-full bg-accent"></span>
+              <span class="size-3 rounded-full bg-positive"></span>
+              <span class="size-3 rounded-full bg-warning"></span>
+            </div>
+          </div>
+        </aside>
 
-      <h1 class="space-y-1 text-3xl font-black leading-tight sm:text-5xl">
-        <span id="hero-typed" data-text="Tailwind CSS v4로 만든" class="hero-typed block">
-          <span id="hero-typed-track" class="hero-track"></span>
-        </span>
-        <span id="hero-typed-second" data-text="타이핑 애니메이션 예제입니다." class="hero-typed hero-line-delayed block text-accent">
-          <span id="hero-typed-second-track" class="hero-track"></span>
-        </span>
-        <span id="hero-typed-third" data-text="옵션은 조합해서 확장할 수 있습니다." class="hero-typed hero-line-delayed block text-ink/75">
-          <span id="hero-typed-third-track" class="hero-track"></span>
-        </span>
-      </h1>
+        <aside id="manual-index" class="border-b border-divider bg-panel px-5 py-6 lg:border-b-0 lg:border-r lg:px-6">
+          <div class="space-y-6">
+            <div>
+              <p class="text-xs font-semibold tracking-[0.14em] text-muted">PROJECT DASHBOARD</p>
+              <h2 class="mt-2 font-display text-[1.55rem] font-bold leading-tight">User Experience Design</h2>
+              <p class="mt-1 text-sm text-muted">Project #1</p>
+            </div>
 
-      <p class="hero-reveal mt-6 max-w-2xl text-sm leading-relaxed text-ink/75 sm:text-base" data-hero-order="1">
-        `typing-animation-lib.js`와 Tailwind 유틸리티를 함께 사용해 두 줄 타이핑과 후속 요소 리빌을 구성한 샘플입니다.
-      </p>
+            <nav class="space-y-1 text-sm">
+              <a href="#hero-stage" class="flex items-center gap-3 rounded-xl border border-divider bg-slate-100 px-3 py-2 font-semibold">
+                <span class="inline-flex size-5 items-center justify-center rounded-full border border-ink/20 text-[10px]">A</span>
+                데모 실행 영역
+              </a>
+              <a href="#manual-top-level" class="flex items-center gap-3 rounded-xl px-3 py-2 font-semibold text-ink/80 transition hover:bg-slate-100">
+                <span class="inline-flex size-5 items-center justify-center rounded-full border border-ink/20 text-[10px]">B</span>
+                Top-level 옵션
+              </a>
+              <a href="#manual-lines" class="flex items-center gap-3 rounded-xl px-3 py-2 font-semibold text-ink/80 transition hover:bg-slate-100">
+                <span class="inline-flex size-5 items-center justify-center rounded-full border border-ink/20 text-[10px]">C</span>
+                lines[] 옵션
+              </a>
+              <a href="#manual-live-code" class="flex items-center gap-3 rounded-xl px-3 py-2 font-semibold text-ink/80 transition hover:bg-slate-100">
+                <span class="inline-flex size-5 items-center justify-center rounded-full border border-ink/20 text-[10px]">D</span>
+                현재 실행 코드
+              </a>
+              <a href="#manual-option-patterns" class="flex items-center gap-3 rounded-xl px-3 py-2 font-semibold text-ink/80 transition hover:bg-slate-100">
+                <span class="inline-flex size-5 items-center justify-center rounded-full border border-ink/20 text-[10px]">E</span>
+                옵션 형태 패턴
+              </a>
+              <a href="#manual-presets" class="flex items-center gap-3 rounded-xl px-3 py-2 font-semibold text-ink/80 transition hover:bg-slate-100">
+                <span class="inline-flex size-5 items-center justify-center rounded-full border border-ink/20 text-[10px]">F</span>
+                프리셋 매뉴얼
+              </a>
+            </nav>
 
-      <div class="mt-8 flex flex-wrap gap-2">
-        <span class="hero-reveal rounded-xl border border-ink/10 bg-white px-3 py-1.5 text-sm font-medium" data-hero-order="2">Typewriter</span>
-        <span class="hero-reveal rounded-xl border border-ink/10 bg-white px-3 py-1.5 text-sm font-medium" data-hero-order="3">Korean IME</span>
-        <span class="hero-reveal rounded-xl border border-ink/10 bg-white px-3 py-1.5 text-sm font-medium" data-hero-order="4">Reveal Motion</span>
-      </div>
+            <section class="ui-card p-4">
+              <p class="text-xs font-semibold tracking-[0.12em] text-muted">MANUAL INDEX</p>
+              <div class="mt-3 space-y-1 text-sm">
+                <a href="#manual-top-level" class="manual-link">
+                  <span class="manual-dot bg-fuchsia-500"></span>
+                  <span><strong>Top-level</strong><br /><span class="text-xs text-muted">global runtime options</span></span>
+                </a>
+                <a href="#manual-lines" class="manual-link">
+                  <span class="manual-dot bg-accent"></span>
+                  <span><strong>lines[]</strong><br /><span class="text-xs text-muted">per-line behavior</span></span>
+                </a>
+                <a href="#manual-option-patterns" class="manual-link">
+                  <span class="manual-dot bg-emerald-500"></span>
+                  <span><strong>Patterns</strong><br /><span class="text-xs text-muted">integration templates</span></span>
+                </a>
+                <a href="#manual-presets" class="manual-link">
+                  <span class="manual-dot bg-rose-500"></span>
+                  <span><strong>Presets</strong><br /><span class="text-xs text-muted">ready-made scenarios</span></span>
+                </a>
+              </div>
+            </section>
+          </div>
+        </aside>
 
-      <div class="mt-6 flex flex-wrap gap-2">
-        <button type="button" data-preset="default" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">기본 2줄</button>
-        <button type="button" data-preset="instant" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">즉시 출력</button>
-        <button type="button" data-preset="three-line" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">3줄 혼합</button>
-        <button type="button" data-preset="manual" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">수동 시작</button>
-        <button type="button" data-preset="in-view-replay" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">뷰포트 리플레이</button>
-        <button type="button" data-preset="interaction-ux" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">인터랙션 UX</button>
-      </div>
+        <main class="space-y-6 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+          <header class="ui-card p-5 sm:p-6">
+            <p class="text-xs font-semibold tracking-[0.14em] text-muted">TAILWIND + TYPING ENGINE</p>
+            <h1 class="mt-2 font-display text-3xl font-bold sm:text-4xl">Welcome back, Mide!</h1>
+            <p class="mt-2 text-sm text-muted">아래 프리셋 탭으로 타이핑 애니메이션 시나리오를 즉시 전환할 수 있습니다.</p>
+            <div class="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
+              <button type="button" data-preset="default" class="rounded-xl border border-divider bg-white px-3 py-2 text-xs font-bold tracking-[0.03em] transition hover:bg-slate-100">기본 2줄</button>
+              <button type="button" data-preset="instant" class="rounded-xl border border-divider bg-white px-3 py-2 text-xs font-bold tracking-[0.03em] transition hover:bg-slate-100">즉시 출력</button>
+              <button type="button" data-preset="three-line" class="rounded-xl border border-divider bg-white px-3 py-2 text-xs font-bold tracking-[0.03em] transition hover:bg-slate-100">3줄 혼합</button>
+              <button type="button" data-preset="manual" class="rounded-xl border border-divider bg-white px-3 py-2 text-xs font-bold tracking-[0.03em] transition hover:bg-slate-100">수동 시작</button>
+              <button type="button" data-preset="in-view-replay" class="rounded-xl border border-divider bg-white px-3 py-2 text-xs font-bold tracking-[0.03em] transition hover:bg-slate-100">뷰포트 리플레이</button>
+              <button type="button" data-preset="interaction-ux" class="rounded-xl border border-divider bg-white px-3 py-2 text-xs font-bold tracking-[0.03em] transition hover:bg-slate-100">인터랙션 UX</button>
+            </div>
+          </header>
 
-      <div class="mt-3 flex flex-wrap gap-2">
-        <button type="button" data-player-action="play" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Play</button>
-        <button type="button" data-player-action="pause" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Pause</button>
-        <button type="button" data-player-action="resume" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Resume</button>
-        <button type="button" data-player-action="skip" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Skip</button>
-      </div>
+          <section id="hero-stage" class="ui-card overflow-hidden p-5 sm:p-6">
+            <div class="flex items-center justify-between gap-4">
+              <p class="hero-reveal inline-flex rounded-full border border-accent/20 bg-accent/10 px-3 py-1 text-xs font-bold tracking-[0.12em] text-accent" data-hero-order="0">
+                LIVE TYPING PANEL
+              </p>
+              <span class="inline-flex size-4 rounded-full border-2 border-positive"></span>
+            </div>
 
-      <p id="preset-status" class="mt-3 text-xs font-medium text-ink/70">프리셋 로딩 중...</p>
-      <p class="mt-1 text-[11px] text-ink/60">접근성 프리셋에서는 <kbd class="rounded border border-ink/20 bg-white px-1.5 py-0.5 font-semibold">Esc</kbd> 로 Skip 가능합니다.</p>
-    </section>
+            <h2 class="mt-4 space-y-1 font-display text-2xl font-bold leading-tight sm:text-4xl">
+              <span id="hero-typed" data-text="Tailwind CSS v4로 만든" class="hero-typed">
+                <span id="hero-typed-track" class="hero-track"></span>
+              </span>
+              <span id="hero-typed-second" data-text="타이핑 애니메이션 예제입니다." class="hero-typed hero-line-delayed text-accent">
+                <span id="hero-typed-second-track" class="hero-track"></span>
+              </span>
+              <span id="hero-typed-third" data-text="옵션은 조합해서 확장할 수 있습니다." class="hero-typed hero-line-delayed text-ink/65">
+                <span id="hero-typed-third-track" class="hero-track"></span>
+              </span>
+            </h2>
 
-    <section id="manual-docs" class="w-full rounded-3xl border border-ink/10 bg-white/85 p-6 shadow-[0_18px_65px_-45px_rgba(16,42,67,0.45)] sm:p-8">
+            <p class="hero-reveal mt-4 max-w-3xl text-sm leading-relaxed text-muted sm:text-base" data-hero-order="1">
+              `typing-animation-lib.js`와 Tailwind 유틸리티를 결합해 실무형 타이핑 시퀀스를 구현한 데모입니다. 한국어 IME, 뷰포트 트리거, 사용자 상호작용, 접근성 옵션을 프리셋으로 검증할 수 있습니다.
+            </p>
+
+            <div class="mt-5 flex flex-wrap gap-2">
+              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="2">Typewriter</span>
+              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="3">Korean IME</span>
+              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="4">Replay Trigger</span>
+              <span class="hero-reveal rounded-lg border border-divider bg-slate-50 px-3 py-1.5 text-xs font-semibold" data-hero-order="5">A11y Skip</span>
+            </div>
+
+            <div class="mt-6 grid gap-3 sm:grid-cols-4">
+              <button type="button" data-player-action="play" class="rounded-xl border border-divider bg-accent/10 px-3 py-2 text-sm font-bold text-accent transition hover:bg-accent/20">Play</button>
+              <button type="button" data-player-action="pause" class="rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Pause</button>
+              <button type="button" data-player-action="resume" class="rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Resume</button>
+              <button type="button" data-player-action="skip" class="rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Skip</button>
+            </div>
+
+            <div class="mt-4 border-t border-divider pt-4">
+              <p id="preset-status" class="text-sm font-semibold text-ink/80">프리셋 로딩 중...</p>
+              <p class="mt-1 text-xs text-muted">접근성 프리셋에서는 <kbd class="rounded-md border border-divider bg-white px-1.5 py-0.5 font-bold">Esc</kbd> 키로 Skip 가능합니다.</p>
+            </div>
+          </section>
+
+          <section id="manual-docs" class="ui-card p-5 sm:p-6">
       <h2 class="text-xl font-black sm:text-2xl">개발 문서: 예제 변수 사용 가이드</h2>
       <p class="mt-2 text-sm leading-relaxed text-ink/75 sm:text-base">
         아래 항목은 현재 페이지에서 <code>TypingAnimationLib.create(demoConfig)</code>에 실제로 전달되는 변수입니다.
       </p>
 
-      <div class="mt-4 grid gap-5 lg:grid-cols-[260px_minmax(0,1fr)]">
-        <aside id="manual-index" class="self-start rounded-2xl border border-ink/15 bg-white p-4 lg:sticky lg:top-6">
-          <p class="text-xs font-black tracking-[0.1em] text-ink/70">MANUAL SIDE MENU</p>
+      <div class="mt-4 grid gap-5 xl:grid-cols-[220px_minmax(0,1fr)]">
+        <aside id="manual-summary" class="self-start rounded-2xl border border-divider bg-slate-50 p-4">
+          <p class="text-xs font-black tracking-[0.1em] text-muted">SECTION MAP</p>
           <div class="mt-3 flex flex-col gap-2 text-sm">
-            <a href="#hero-stage" class="rounded-lg border border-ink/10 px-3 py-2 font-semibold text-ink/85 hover:bg-ink/5">A. 데모 실행 영역</a>
-            <a href="#manual-top-level" class="rounded-lg border border-ink/10 px-3 py-2 font-semibold text-ink/85 hover:bg-ink/5">B. Top-level 옵션</a>
-            <a href="#manual-lines" class="rounded-lg border border-ink/10 px-3 py-2 font-semibold text-ink/85 hover:bg-ink/5">C. lines[] 옵션</a>
-            <a href="#manual-live-code" class="rounded-lg border border-ink/10 px-3 py-2 font-semibold text-ink/85 hover:bg-ink/5">D. 현재 실행 코드</a>
-            <a href="#manual-option-patterns" class="rounded-lg border border-ink/10 px-3 py-2 font-semibold text-ink/85 hover:bg-ink/5">E. 옵션 형태 패턴</a>
-            <a href="#manual-presets" class="rounded-lg border border-ink/10 px-3 py-2 font-semibold text-ink/85 hover:bg-ink/5">F. 프리셋 매뉴얼</a>
+            <a href="#hero-stage" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">A. 데모 실행 영역</a>
+            <a href="#manual-top-level" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">B. Top-level 옵션</a>
+            <a href="#manual-lines" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">C. lines[] 옵션</a>
+            <a href="#manual-live-code" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">D. 현재 실행 코드</a>
+            <a href="#manual-option-patterns" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">E. 옵션 형태 패턴</a>
+            <a href="#manual-presets" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">F. 프리셋 매뉴얼</a>
           </div>
         </aside>
 
@@ -405,7 +523,10 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
         </div>
       </div>
     </section>
-  </main>
+        </main>
+      </div>
+    </div>
+  </div>
 
   <script src="./typing-animation-lib.js"></script>
   <script>
