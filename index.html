@@ -1,0 +1,574 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tailwind v4 Typing Animation Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-paper: #f6f3eb;
+      --color-ink: #102a43;
+      --color-accent: #0f766e;
+      --color-accent-soft: #99f6e4;
+      --color-card: #fffef8;
+    }
+
+    .hero-typed {
+      @apply relative inline-block whitespace-nowrap;
+    }
+
+    .hero-track {
+      @apply relative inline-block min-h-[1em] align-baseline;
+    }
+
+    .hero-track:not(.is-done)::after {
+      content: "";
+      @apply ml-1 inline-block h-[1.05em] w-[2px] align-[-0.1em] bg-accent;
+      animation: caret-blink 0.85s steps(1, end) infinite;
+    }
+
+    .hero-line-delayed {
+      @apply translate-y-2 opacity-0 transition-all duration-500;
+    }
+
+    .hero-line-delayed.is-active {
+      @apply translate-y-0 opacity-100;
+    }
+
+    .hero-compose-box {
+      @apply rounded bg-accent-soft/80 px-0.5 text-ink;
+    }
+
+    .hero-reveal {
+      @apply translate-y-4 opacity-0 transition-all duration-500;
+    }
+
+    .hero-reveal.is-visible {
+      @apply translate-y-0 opacity-100;
+    }
+
+    @keyframes caret-blink {
+      0%,
+      45% {
+        opacity: 1;
+      }
+
+      50%,
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[radial-gradient(circle_at_top_left,_#fefce8_0%,_#f6f3eb_38%,_#eaf4ff_100%)] text-ink antialiased">
+  <main class="mx-auto flex min-h-screen max-w-5xl flex-col justify-center gap-6 px-6 py-14">
+    <section class="w-full rounded-3xl border border-ink/10 bg-card/90 p-8 shadow-[0_18px_65px_-40px_rgba(16,42,67,0.45)] backdrop-blur sm:p-12">
+      <p class="hero-reveal mb-4 inline-flex rounded-full border border-accent/20 bg-accent-soft/55 px-3 py-1 text-xs font-semibold tracking-[0.15em] text-accent" data-hero-order="0">
+        TAILWIND CSS V4
+      </p>
+
+      <h1 class="space-y-1 text-3xl font-black leading-tight sm:text-5xl">
+        <span id="hero-typed" data-text="Tailwind CSS v4로 만든" class="hero-typed block">
+          <span id="hero-typed-track" class="hero-track"></span>
+        </span>
+        <span id="hero-typed-second" data-text="타이핑 애니메이션 예제입니다." class="hero-typed hero-line-delayed block text-accent">
+          <span id="hero-typed-second-track" class="hero-track"></span>
+        </span>
+        <span id="hero-typed-third" data-text="옵션은 조합해서 확장할 수 있습니다." class="hero-typed hero-line-delayed block text-ink/75">
+          <span id="hero-typed-third-track" class="hero-track"></span>
+        </span>
+      </h1>
+
+      <p class="hero-reveal mt-6 max-w-2xl text-sm leading-relaxed text-ink/75 sm:text-base" data-hero-order="1">
+        `typing-animation-lib.js`와 Tailwind 유틸리티를 함께 사용해 두 줄 타이핑과 후속 요소 리빌을 구성한 샘플입니다.
+      </p>
+
+      <div class="mt-8 flex flex-wrap gap-2">
+        <span class="hero-reveal rounded-xl border border-ink/10 bg-white px-3 py-1.5 text-sm font-medium" data-hero-order="2">Typewriter</span>
+        <span class="hero-reveal rounded-xl border border-ink/10 bg-white px-3 py-1.5 text-sm font-medium" data-hero-order="3">Korean IME</span>
+        <span class="hero-reveal rounded-xl border border-ink/10 bg-white px-3 py-1.5 text-sm font-medium" data-hero-order="4">Reveal Motion</span>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-2">
+        <button type="button" data-preset="default" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">기본 2줄</button>
+        <button type="button" data-preset="instant" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">즉시 출력</button>
+        <button type="button" data-preset="three-line" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">3줄 혼합</button>
+        <button type="button" data-preset="manual" class="rounded-xl border border-ink/15 bg-white px-3 py-1.5 text-xs font-semibold tracking-[0.04em]">수동 시작</button>
+      </div>
+
+      <div class="mt-3 flex flex-wrap gap-2">
+        <button type="button" data-player-action="play" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Play</button>
+        <button type="button" data-player-action="pause" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Pause</button>
+        <button type="button" data-player-action="resume" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Resume</button>
+        <button type="button" data-player-action="skip" class="rounded-lg border border-accent/40 bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">Skip</button>
+      </div>
+
+      <p id="preset-status" class="mt-3 text-xs font-medium text-ink/70">프리셋 로딩 중...</p>
+    </section>
+
+    <section class="w-full rounded-3xl border border-ink/10 bg-white/85 p-6 shadow-[0_18px_65px_-45px_rgba(16,42,67,0.45)] sm:p-8">
+      <h2 class="text-xl font-black sm:text-2xl">개발 문서: 예제 변수 사용 가이드</h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink/75 sm:text-base">
+        아래 항목은 현재 페이지에서 <code>TypingAnimationLib.create(demoConfig)</code>에 실제로 전달되는 변수입니다.
+      </p>
+
+      <article class="mt-6 overflow-hidden rounded-2xl border border-ink/10">
+        <div class="bg-ink px-4 py-2 text-xs font-semibold tracking-[0.08em] text-white">1) Top-level 옵션</div>
+        <table class="w-full text-left text-sm">
+          <thead class="bg-ink/5 text-ink/75">
+            <tr>
+              <th class="px-4 py-2 font-semibold">변수</th>
+              <th class="px-4 py-2 font-semibold">타입</th>
+              <th class="px-4 py-2 font-semibold">현재 값</th>
+              <th class="px-4 py-2 font-semibold">설명</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">pauseWhenHidden</td>
+              <td class="px-4 py-2 font-mono">boolean</td>
+              <td class="px-4 py-2 font-mono">true</td>
+              <td class="px-4 py-2 text-ink/80">브라우저 탭 비활성화 시 자동 일시정지하고, 다시 활성화되면 자동 재개합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">reducedMotionBehavior</td>
+              <td class="px-4 py-2 font-mono">"instant" | "animate"</td>
+              <td class="px-4 py-2 font-mono">"instant"</td>
+              <td class="px-4 py-2 text-ink/80"><code>prefers-reduced-motion</code> 사용자에게 애니메이션 대신 즉시 완성 상태를 보여줍니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">reveal.selector</td>
+              <td class="px-4 py-2 font-mono">string</td>
+              <td class="px-4 py-2 font-mono">".hero-reveal"</td>
+              <td class="px-4 py-2 text-ink/80">후속 노출(리빌) 대상을 선택하는 CSS 선택자입니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">reveal.baseDelay</td>
+              <td class="px-4 py-2 font-mono">number(ms)</td>
+              <td class="px-4 py-2 font-mono">90</td>
+              <td class="px-4 py-2 text-ink/80">리빌 시작 지연 시간입니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">reveal.step</td>
+              <td class="px-4 py-2 font-mono">number(ms)</td>
+              <td class="px-4 py-2 font-mono">160</td>
+              <td class="px-4 py-2 text-ink/80">대상 간 리빌 간격입니다. <code>data-hero-order</code>와 함께 순차 노출됩니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="mt-5 overflow-hidden rounded-2xl border border-ink/10">
+        <div class="bg-ink px-4 py-2 text-xs font-semibold tracking-[0.08em] text-white">2) lines[] 라인별 옵션</div>
+        <table class="w-full text-left text-sm">
+          <thead class="bg-ink/5 text-ink/75">
+            <tr>
+              <th class="px-4 py-2 font-semibold">변수</th>
+              <th class="px-4 py-2 font-semibold">타입</th>
+              <th class="px-4 py-2 font-semibold">예시</th>
+              <th class="px-4 py-2 font-semibold">설명</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">containerId</td>
+              <td class="px-4 py-2 font-mono">string</td>
+              <td class="px-4 py-2 font-mono">"hero-typed"</td>
+              <td class="px-4 py-2 text-ink/80">라인 컨테이너 요소 ID입니다. 이 요소의 <code>data-text</code>를 기본 텍스트로 사용합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">trackId</td>
+              <td class="px-4 py-2 font-mono">string</td>
+              <td class="px-4 py-2 font-mono">"hero-typed-track"</td>
+              <td class="px-4 py-2 text-ink/80">문자가 실제로 렌더링되는 내부 트랙 요소 ID입니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">strategy</td>
+              <td class="px-4 py-2 font-mono">"plain" | "ime-ko" | "instant"</td>
+              <td class="px-4 py-2 font-mono">"ime-ko"</td>
+              <td class="px-4 py-2 text-ink/80"><code>plain</code>: 일반 타이핑, <code>ime-ko</code>: 한글 조합 프레임 타이핑, <code>instant</code>: 즉시 출력</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">delayBefore</td>
+              <td class="px-4 py-2 font-mono">number(ms)</td>
+              <td class="px-4 py-2 font-mono">260</td>
+              <td class="px-4 py-2 text-ink/80">해당 라인 시작 전 대기 시간입니다. 첫 라인 인트로에 주로 사용합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">delayAfter</td>
+              <td class="px-4 py-2 font-mono">number(ms)</td>
+              <td class="px-4 py-2 font-mono">680 / 1000</td>
+              <td class="px-4 py-2 text-ink/80">해당 라인 종료 후 대기 시간입니다. 다음 라인 또는 리빌 시작 텀을 제어합니다.</td>
+            </tr>
+            <tr class="border-t border-ink/10">
+              <td class="px-4 py-2 font-mono">activateClass</td>
+              <td class="px-4 py-2 font-mono">string</td>
+              <td class="px-4 py-2 font-mono">"is-active"</td>
+              <td class="px-4 py-2 text-ink/80">라인 시작 시 컨테이너에 부여할 클래스입니다. 2줄 fade-in/slide-in 트리거로 사용합니다.</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="mt-5 overflow-hidden rounded-2xl border border-ink/10">
+        <div class="bg-ink px-4 py-2 text-xs font-semibold tracking-[0.08em] text-white">3) 현재 실행 코드</div>
+        <pre id="preset-code" class="overflow-x-auto bg-[#0f172a] p-4 text-xs leading-relaxed text-slate-200 sm:text-sm"><code>const demoConfig = {
+  pauseWhenHidden: true,
+  reducedMotionBehavior: "instant",
+  reveal: {
+    selector: ".hero-reveal",
+    baseDelay: 90,
+    step: 160
+  },
+  lines: [
+    {
+      containerId: "hero-typed",
+      trackId: "hero-typed-track",
+      strategy: "plain",
+      delayBefore: 260,
+      delayAfter: 680
+    },
+    {
+      containerId: "hero-typed-second",
+      trackId: "hero-typed-second-track",
+      strategy: "ime-ko",
+      activateClass: "is-active",
+      delayAfter: 1000
+    }
+  ]
+};
+
+window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></pre>
+      </article>
+
+      <article class="mt-5 overflow-hidden rounded-2xl border border-ink/10">
+        <div class="bg-ink px-4 py-2 text-xs font-semibold tracking-[0.08em] text-white">4) 다양한 옵션 형태 예시</div>
+        <div class="grid gap-4 p-4 text-sm leading-relaxed text-ink/85 sm:grid-cols-2">
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">선택자 기반 지정</p>
+            <p class="mt-1 text-ink/75"><code>container: "#hero-typed"</code>, <code>track: "#hero-typed-track"</code>처럼 ID 대신 selector 문자열을 그대로 전달.</p>
+          </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">텍스트 직접 주입</p>
+            <p class="mt-1 text-ink/75"><code>text</code>를 주면 <code>data-text</code>보다 우선 적용. API/상태값 기반 문구 동적 반영에 적합.</p>
+          </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">속도 랜덤 고정</p>
+            <p class="mt-1 text-ink/75"><code>randomFn: () =&gt; 0.15</code>로 타이핑 지연 랜덤성을 고정해 테스트 재현성 확보.</p>
+          </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3">
+            <p class="font-semibold">수동 시작 모드</p>
+            <p class="mt-1 text-ink/75"><code>autoStart: false</code> 후 <code>player.play()</code> 호출로 인터랙션 트리거 시작.</p>
+          </div>
+          <div class="rounded-xl border border-ink/10 bg-ink/5 p-3 sm:col-span-2">
+            <p class="font-semibold">이벤트 훅</p>
+            <p class="mt-1 text-ink/75"><code>hooks.onLineStep</code>, <code>hooks.onComplete</code>로 진행률/로깅/분석 이벤트를 연결.</p>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script src="./typing-animation-lib.js"></script>
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      if (window.TypingAnimationLib && typeof window.TypingAnimationLib.create === "function") {
+        const presetCodeEl = document.getElementById("preset-code");
+        const presetStatusEl = document.getElementById("preset-status");
+        const presetButtons = Array.from(document.querySelectorAll("[data-preset]"));
+        const playerActionButtons = Array.from(document.querySelectorAll("[data-player-action]"));
+        const revealTargets = Array.from(document.querySelectorAll(".hero-reveal"));
+        const delayedTargets = ["hero-typed-second", "hero-typed-third"];
+        const trackTargets = ["hero-typed-track", "hero-typed-second-track", "hero-typed-third-track"];
+
+        function setStatus(message) {
+          if (presetStatusEl) presetStatusEl.textContent = message;
+        }
+
+        function setCode(message) {
+          if (!presetCodeEl) return;
+          const codeEl = presetCodeEl.querySelector("code");
+          if (!codeEl) return;
+          codeEl.textContent = message;
+        }
+
+        function resetHeroDom() {
+          delayedTargets.forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove("is-active");
+          });
+
+          trackTargets.forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = "";
+            el.classList.remove("is-done");
+          });
+
+          revealTargets.forEach(function (el) {
+            el.classList.remove("is-visible");
+          });
+        }
+
+        function destroyCurrentPlayer() {
+          if (!window.demoTypingPlayer) return;
+          if (typeof window.demoTypingPlayer.destroy === "function") {
+            window.demoTypingPlayer.destroy();
+          }
+          window.demoTypingPlayer = null;
+        }
+
+        function buildHooks(label) {
+          return {
+            onPlay: function () {
+              setStatus("[" + label + "] 재생 중");
+            },
+            onPause: function () {
+              setStatus("[" + label + "] 일시정지");
+            },
+            onResume: function () {
+              setStatus("[" + label + "] 재개");
+            },
+            onComplete: function (payload) {
+              if (payload && payload.skipped) {
+                setStatus("[" + label + "] Skip으로 종료");
+                return;
+              }
+              setStatus("[" + label + "] 완료");
+            },
+            onCancel: function () {
+              setStatus("[" + label + "] 취소됨");
+            }
+          };
+        }
+
+        const presets = {
+          "default": {
+            label: "기본 2줄",
+            code: `const demoConfig = {
+  pauseWhenHidden: true,
+  reducedMotionBehavior: "instant",
+  reveal: { selector: ".hero-reveal", baseDelay: 90, step: 160 },
+  lines: [
+    { containerId: "hero-typed", trackId: "hero-typed-track", strategy: "plain", delayBefore: 260, delayAfter: 680 },
+    { containerId: "hero-typed-second", trackId: "hero-typed-second-track", strategy: "ime-ko", activateClass: "is-active", delayAfter: 1000 }
+  ]
+};`,
+            createConfig: function () {
+              return {
+                pauseWhenHidden: true,
+                reducedMotionBehavior: "instant",
+                reveal: {
+                  selector: ".hero-reveal",
+                  baseDelay: 90,
+                  step: 160
+                },
+                hooks: buildHooks("기본 2줄"),
+                lines: [
+                  {
+                    containerId: "hero-typed",
+                    trackId: "hero-typed-track",
+                    strategy: "plain",
+                    delayBefore: 260,
+                    delayAfter: 680
+                  },
+                  {
+                    containerId: "hero-typed-second",
+                    trackId: "hero-typed-second-track",
+                    strategy: "ime-ko",
+                    activateClass: "is-active",
+                    delayAfter: 1000
+                  }
+                ]
+              };
+            }
+          },
+          "instant": {
+            label: "즉시 출력",
+            code: `const demoConfig = {
+  reveal: false,
+  lines: [
+    { container: "#hero-typed", track: "#hero-typed-track", text: "애니메이션 없이 즉시 출력", strategy: "instant" },
+    { container: "#hero-typed-second", track: "#hero-typed-second-track", text: "로딩/접근성 시나리오에 유용", strategy: "instant", activateClass: "is-active" }
+  ]
+};`,
+            createConfig: function () {
+              return {
+                reveal: false,
+                pauseWhenHidden: false,
+                hooks: buildHooks("즉시 출력"),
+                lines: [
+                  {
+                    container: "#hero-typed",
+                    track: "#hero-typed-track",
+                    text: "애니메이션 없이 즉시 출력",
+                    strategy: "instant",
+                    delayBefore: 0,
+                    delayAfter: 0
+                  },
+                  {
+                    container: "#hero-typed-second",
+                    track: "#hero-typed-second-track",
+                    text: "로딩/접근성 시나리오에 유용",
+                    strategy: "instant",
+                    activateClass: "is-active",
+                    delayAfter: 0
+                  }
+                ]
+              };
+            }
+          },
+          "three-line": {
+            label: "3줄 혼합",
+            code: `const demoConfig = {
+  composeClassName: "hero-compose-box",
+  lines: [
+    { containerId: "hero-typed", trackId: "hero-typed-track", text: "Plain + IME + Plain 3줄 시퀀스", strategy: "plain", delayBefore: 120, delayAfter: 260 },
+    { containerId: "hero-typed-second", trackId: "hero-typed-second-track", text: "옵션을 조합하면 시나리오를 확장할 수 있어요.", strategy: "ime-ko", activateClass: "is-active", delayAfter: 200 },
+    { containerId: "hero-typed-third", trackId: "hero-typed-third-track", text: "마지막 줄로 메시지를 보강합니다.", strategy: "plain", activateClass: "is-active", delayAfter: 700 }
+  ]
+};`,
+            createConfig: function () {
+              return {
+                composeClassName: "hero-compose-box",
+                pauseWhenHidden: true,
+                reducedMotionBehavior: "animate",
+                reveal: {
+                  selector: ".hero-reveal",
+                  baseDelay: 60,
+                  step: 110
+                },
+                hooks: buildHooks("3줄 혼합"),
+                lines: [
+                  {
+                    containerId: "hero-typed",
+                    trackId: "hero-typed-track",
+                    text: "Plain + IME + Plain 3줄 시퀀스",
+                    strategy: "plain",
+                    delayBefore: 120,
+                    delayAfter: 260
+                  },
+                  {
+                    containerId: "hero-typed-second",
+                    trackId: "hero-typed-second-track",
+                    text: "옵션을 조합하면 시나리오를 확장할 수 있어요.",
+                    strategy: "ime-ko",
+                    activateClass: "is-active",
+                    delayAfter: 200
+                  },
+                  {
+                    containerId: "hero-typed-third",
+                    trackId: "hero-typed-third-track",
+                    text: "마지막 줄로 메시지를 보강합니다.",
+                    strategy: "plain",
+                    activateClass: "is-active",
+                    delayAfter: 700
+                  }
+                ]
+              };
+            }
+          },
+          "manual": {
+            label: "수동 시작",
+            code: `const demoConfig = {
+  autoStart: false,
+  randomFn: () => 0.15,
+  hooks: { onComplete: (e) => console.log("done", e) },
+  lines: [
+    { containerId: "hero-typed", trackId: "hero-typed-track", text: "수동 시작 프리셋", strategy: "plain" },
+    { containerId: "hero-typed-second", trackId: "hero-typed-second-track", text: "Play 버튼으로 시작합니다.", strategy: "plain", activateClass: "is-active" }
+  ]
+};`,
+            createConfig: function () {
+              return {
+                autoStart: false,
+                randomFn: function () { return 0.15; },
+                reveal: {
+                  selector: ".hero-reveal",
+                  baseDelay: 100,
+                  step: 140
+                },
+                hooks: buildHooks("수동 시작"),
+                lines: [
+                  {
+                    containerId: "hero-typed",
+                    trackId: "hero-typed-track",
+                    text: "수동 시작 프리셋",
+                    strategy: "plain",
+                    delayBefore: 80,
+                    delayAfter: 180
+                  },
+                  {
+                    containerId: "hero-typed-second",
+                    trackId: "hero-typed-second-track",
+                    text: "Play 버튼으로 시작합니다.",
+                    strategy: "plain",
+                    activateClass: "is-active",
+                    delayAfter: 800
+                  }
+                ]
+              };
+            }
+          }
+        };
+
+        function setActivePresetButton(name) {
+          presetButtons.forEach(function (button) {
+            const active = button.getAttribute("data-preset") === name;
+            if (active) {
+              button.classList.add("bg-accent", "text-white", "border-accent");
+              button.classList.remove("bg-white");
+              return;
+            }
+
+            button.classList.remove("bg-accent", "text-white", "border-accent");
+            button.classList.add("bg-white");
+          });
+        }
+
+        function applyPreset(name) {
+          const selected = presets[name] || presets["default"];
+          destroyCurrentPlayer();
+          resetHeroDom();
+          setCode(selected.code);
+          setActivePresetButton(name);
+
+          const config = selected.createConfig();
+          window.demoTypingPlayer = window.TypingAnimationLib.create(config);
+
+          if (config.autoStart === false) {
+            setStatus("[" + selected.label + "] 준비 완료. Play 버튼을 눌러 시작하세요.");
+            return;
+          }
+
+          setStatus("[" + selected.label + "] 프리셋 적용");
+        }
+
+        presetButtons.forEach(function (button) {
+          button.addEventListener("click", function () {
+            const name = button.getAttribute("data-preset");
+            applyPreset(name);
+          });
+        });
+
+        playerActionButtons.forEach(function (button) {
+          button.addEventListener("click", function () {
+            const action = button.getAttribute("data-player-action");
+            const player = window.demoTypingPlayer;
+            if (!player || typeof player[action] !== "function") return;
+            player[action]();
+
+            if (action === "play") setStatus("수동 제어: Play");
+            if (action === "pause") setStatus("수동 제어: Pause");
+            if (action === "resume") setStatus("수동 제어: Resume");
+            if (action === "skip") setStatus("수동 제어: Skip");
+          });
+        });
+
+        applyPreset("default");
+      }
+    });
+  </script>
+</body>
+</html>
