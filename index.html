@@ -67,12 +67,10 @@
       @apply rounded-2xl border border-divider bg-panel shadow-[0_18px_46px_-34px_rgba(0,0,0,0.42)];
     }
 
-    .manual-link {
-      @apply flex items-start gap-3 rounded-xl border border-transparent px-3 py-2 transition hover:border-divider hover:bg-slate-50;
-    }
-
-    .manual-dot {
-      @apply mt-1 inline-block size-2 rounded-full bg-accent;
+    .player-action-btn[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
     }
 
     @keyframes caret-blink {
@@ -89,38 +87,14 @@
   </style>
 </head>
 <body class="min-h-screen bg-page text-ink antialiased">
-  <div class="mx-auto w-full max-w-[1480px] px-4 py-6 sm:px-6 sm:py-10">
-    <div class="overflow-hidden rounded-[34px] border border-black/5 bg-shell shadow-[0_30px_70px_-38px_rgba(0,0,0,0.58)]">
-      <div class="grid min-h-[88vh] lg:grid-cols-[72px_320px_minmax(0,1fr)]">
-        <aside class="border-b border-divider bg-slate-50/75 px-3 py-4 lg:border-b-0 lg:border-r">
-          <div class="flex items-center justify-between lg:flex-col lg:justify-start lg:gap-4">
-            <button class="rounded-xl border border-divider bg-panel p-2 text-ink transition hover:bg-slate-100" aria-label="새 프로젝트">
-              <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14" /></svg>
-            </button>
-            <div class="flex gap-2 lg:flex-col">
-              <button class="rounded-xl border border-divider bg-panel p-2 text-ink transition hover:bg-slate-100" aria-label="홈">
-                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11 12 4l8 7v9h-6v-6H10v6H4z" /></svg>
-              </button>
-              <button class="rounded-xl border border-divider bg-slate-900 p-2 text-white" aria-label="레이어">
-                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5M3 18l9 5 9-5" /></svg>
-              </button>
-              <button class="rounded-xl border border-divider bg-panel p-2 text-ink transition hover:bg-slate-100" aria-label="프로필">
-                <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 20c1.8-3.8 5-5.7 8-5.7S18.2 16.2 20 20" /></svg>
-              </button>
-            </div>
-            <div class="hidden lg:flex lg:flex-col lg:items-center lg:gap-4 lg:pt-40">
-              <span class="size-3 rounded-full bg-accent"></span>
-              <span class="size-3 rounded-full bg-positive"></span>
-              <span class="size-3 rounded-full bg-warning"></span>
-            </div>
-          </div>
-        </aside>
-
-        <aside id="manual-index" class="border-b border-divider bg-panel px-5 py-6 lg:border-b-0 lg:border-r lg:px-6">
+  <div class="mx-auto w-full max-w-[1480px] overflow-hidden px-4 py-6 sm:px-6 sm:py-10 lg:overflow-visible">
+    <div class="border border-black/5 bg-shell">
+      <div class="grid min-h-[88vh] lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start">
+        <aside id="manual-index" class="rounded-t-[34px] border-b border-divider bg-panel px-5 py-6 lg:h-screen lg:self-start lg:overflow-y-auto lg:rounded-none lg:sticky lg:top-0 lg:border-b-0 lg:border-r lg:px-6">
           <div class="space-y-6">
             <div>
               <p class="text-xs font-semibold tracking-[0.14em] text-muted">PROJECT DASHBOARD</p>
-              <h2 class="mt-2 font-display text-[1.55rem] font-bold leading-tight">User Experience Design</h2>
+              <h2 class="mt-2 font-display text-[1.55rem] font-bold leading-tight">Typing Animation Guide</h2>
               <p class="mt-1 text-sm text-muted">Project #1</p>
             </div>
 
@@ -151,34 +125,13 @@
               </a>
             </nav>
 
-            <section class="ui-card p-4">
-              <p class="text-xs font-semibold tracking-[0.12em] text-muted">MANUAL INDEX</p>
-              <div class="mt-3 space-y-1 text-sm">
-                <a href="#manual-top-level" class="manual-link">
-                  <span class="manual-dot bg-fuchsia-500"></span>
-                  <span><strong>Top-level</strong><br /><span class="text-xs text-muted">global runtime options</span></span>
-                </a>
-                <a href="#manual-lines" class="manual-link">
-                  <span class="manual-dot bg-accent"></span>
-                  <span><strong>lines[]</strong><br /><span class="text-xs text-muted">per-line behavior</span></span>
-                </a>
-                <a href="#manual-option-patterns" class="manual-link">
-                  <span class="manual-dot bg-emerald-500"></span>
-                  <span><strong>Patterns</strong><br /><span class="text-xs text-muted">integration templates</span></span>
-                </a>
-                <a href="#manual-presets" class="manual-link">
-                  <span class="manual-dot bg-rose-500"></span>
-                  <span><strong>Presets</strong><br /><span class="text-xs text-muted">ready-made scenarios</span></span>
-                </a>
-              </div>
-            </section>
           </div>
         </aside>
 
         <main class="space-y-6 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
           <header class="ui-card p-5 sm:p-6">
             <p class="text-xs font-semibold tracking-[0.14em] text-muted">TAILWIND + TYPING ENGINE</p>
-            <h1 class="mt-2 font-display text-3xl font-bold sm:text-4xl">Welcome back, Mide!</h1>
+            <h1 class="mt-2 font-display text-3xl font-bold sm:text-4xl">원하는 기능을 선택해 타이핑 시나리오를 실행해보세요.</h1>
             <p class="mt-2 text-sm text-muted">아래 프리셋 탭으로 타이핑 애니메이션 시나리오를 즉시 전환할 수 있습니다.</p>
             <div class="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-6">
               <button type="button" data-preset="default" class="rounded-xl border border-divider bg-white px-3 py-2 text-xs font-bold tracking-[0.03em] transition hover:bg-slate-100">기본 2줄</button>
@@ -222,11 +175,12 @@
             </div>
 
             <div class="mt-6 grid gap-3 sm:grid-cols-4">
-              <button type="button" data-player-action="play" class="rounded-xl border border-divider bg-accent/10 px-3 py-2 text-sm font-bold text-accent transition hover:bg-accent/20">Play</button>
-              <button type="button" data-player-action="pause" class="rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Pause</button>
-              <button type="button" data-player-action="resume" class="rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Resume</button>
-              <button type="button" data-player-action="skip" class="rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Skip</button>
+              <button type="button" data-player-action="play" class="player-action-btn rounded-xl border border-divider bg-accent/10 px-3 py-2 text-sm font-bold text-accent transition hover:bg-accent/20">Play</button>
+              <button type="button" data-player-action="pause" class="player-action-btn rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Pause</button>
+              <button type="button" data-player-action="resume" class="player-action-btn rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Resume</button>
+              <button type="button" data-player-action="skip" class="player-action-btn rounded-xl border border-divider bg-white px-3 py-2 text-sm font-bold transition hover:bg-slate-100">Skip</button>
             </div>
+            <p id="player-action-guide" class="mt-2 text-xs font-semibold text-muted">버튼 상태를 계산 중입니다...</p>
 
             <div class="mt-4 border-t border-divider pt-4">
               <p id="preset-status" class="text-sm font-semibold text-ink/80">프리셋 로딩 중...</p>
@@ -240,19 +194,7 @@
         아래 항목은 현재 페이지에서 <code>TypingAnimationLib.create(demoConfig)</code>에 실제로 전달되는 변수입니다.
       </p>
 
-      <div class="mt-4 grid gap-5 xl:grid-cols-[220px_minmax(0,1fr)]">
-        <aside id="manual-summary" class="self-start rounded-2xl border border-divider bg-slate-50 p-4">
-          <p class="text-xs font-black tracking-[0.1em] text-muted">SECTION MAP</p>
-          <div class="mt-3 flex flex-col gap-2 text-sm">
-            <a href="#hero-stage" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">A. 데모 실행 영역</a>
-            <a href="#manual-top-level" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">B. Top-level 옵션</a>
-            <a href="#manual-lines" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">C. lines[] 옵션</a>
-            <a href="#manual-live-code" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">D. 현재 실행 코드</a>
-            <a href="#manual-option-patterns" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">E. 옵션 형태 패턴</a>
-            <a href="#manual-presets" class="rounded-lg border border-divider px-3 py-2 font-semibold text-ink/85 transition hover:bg-white">F. 프리셋 매뉴얼</a>
-          </div>
-        </aside>
-
+      <div class="mt-4">
         <div class="space-y-5">
       <article id="manual-top-level" class="scroll-mt-24 overflow-hidden rounded-2xl border border-ink/10">
         <div class="bg-ink px-4 py-2 text-xs font-semibold tracking-[0.08em] text-white">1) Top-level 옵션</div>
@@ -534,11 +476,32 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
       if (window.TypingAnimationLib && typeof window.TypingAnimationLib.create === "function") {
         const presetCodeEl = document.getElementById("preset-code");
         const presetStatusEl = document.getElementById("preset-status");
+        const playerActionGuideEl = document.getElementById("player-action-guide");
         const presetButtons = Array.from(document.querySelectorAll("[data-preset]"));
         const playerActionButtons = Array.from(document.querySelectorAll("[data-player-action]"));
         const revealTargets = Array.from(document.querySelectorAll(".hero-reveal"));
         const delayedTargets = ["hero-typed-second", "hero-typed-third"];
         const trackTargets = ["hero-typed-track", "hero-typed-second-track", "hero-typed-third-track"];
+        const actionButtonsByName = playerActionButtons.reduce(function (acc, button) {
+          const action = button.getAttribute("data-player-action");
+          if (action) acc[action] = button;
+          return acc;
+        }, {});
+        const actionLabelMap = {
+          play: "Play",
+          pause: "Pause",
+          resume: "Resume",
+          skip: "Skip"
+        };
+        const playerStatus = window.TypingAnimationLib.status || {
+          IDLE: "idle",
+          RUNNING: "running",
+          PAUSED: "paused",
+          COMPLETED: "completed",
+          CANCELLED: "cancelled",
+          DESTROYED: "destroyed"
+        };
+        let currentPresetMeta = null;
 
         function setStatus(message) {
           if (presetStatusEl) presetStatusEl.textContent = message;
@@ -549,6 +512,92 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           const codeEl = presetCodeEl.querySelector("code");
           if (!codeEl) return;
           codeEl.textContent = message;
+        }
+
+        function setActionGuide(message) {
+          if (!playerActionGuideEl) return;
+          playerActionGuideEl.textContent = message;
+        }
+
+        function setActionEnabled(action, enabled) {
+          const button = actionButtonsByName[action];
+          if (!button) return;
+          button.disabled = !enabled;
+          button.setAttribute("aria-disabled", enabled ? "false" : "true");
+        }
+
+        function getPlayerStatus() {
+          const player = window.demoTypingPlayer;
+          if (!player || typeof player.getState !== "function") return null;
+          const state = player.getState();
+          return state && state.status ? state.status : null;
+        }
+
+        function syncActionUi() {
+          const status = getPlayerStatus();
+          const replayMode = currentPresetMeta && currentPresetMeta.replayMode ? currentPresetMeta.replayMode : "once";
+          const cooldownMs = currentPresetMeta && Number.isFinite(currentPresetMeta.cooldownMs) ? currentPresetMeta.cooldownMs : 0;
+          const triggerMode = currentPresetMeta && currentPresetMeta.startTrigger ? currentPresetMeta.startTrigger : "immediate";
+          const manualStart = currentPresetMeta && currentPresetMeta.autoStart === false;
+
+          setActionEnabled("play", false);
+          setActionEnabled("pause", false);
+          setActionEnabled("resume", false);
+          setActionEnabled("skip", false);
+
+          if (!status || status === playerStatus.DESTROYED) {
+            setActionGuide("프리셋을 선택하면 사용 가능한 제어 버튼이 자동으로 표시됩니다.");
+            return;
+          }
+
+          if (status === playerStatus.IDLE) {
+            setActionEnabled("play", true);
+            if (manualStart) {
+              setActionGuide("현재는 시작 전 대기 상태입니다. Play로 시작할 수 있습니다.");
+              return;
+            }
+            if (triggerMode === "interaction") {
+              setActionGuide("카드 클릭 시 자동 시작됩니다. 즉시 시작하려면 Play를 누르세요.");
+              return;
+            }
+            if (triggerMode === "in-view") {
+              setActionGuide("뷰포트 진입 시 자동 시작됩니다. 즉시 시작하려면 Play를 누르세요.");
+              return;
+            }
+            setActionGuide("대기 상태입니다. Play로 수동 시작할 수 있습니다.");
+            return;
+          }
+
+          if (status === playerStatus.RUNNING) {
+            setActionEnabled("pause", true);
+            setActionEnabled("skip", true);
+            setActionGuide("재생 중입니다. Pause(일시정지) 또는 Skip(즉시 완료)을 사용할 수 있습니다.");
+            return;
+          }
+
+          if (status === playerStatus.PAUSED) {
+            setActionEnabled("resume", true);
+            setActionEnabled("skip", true);
+            setActionGuide("일시정지 상태입니다. Resume(재개) 또는 Skip(즉시 완료)을 사용할 수 있습니다.");
+            return;
+          }
+
+          if (status === playerStatus.COMPLETED || status === playerStatus.CANCELLED) {
+            const canReplay = replayMode !== "once";
+            setActionEnabled("play", canReplay);
+            if (!canReplay) {
+              setActionGuide("완료 상태입니다. 현재 프리셋은 1회 재생 정책이라 Play 재실행이 제한됩니다.");
+              return;
+            }
+            if (cooldownMs > 0) {
+              setActionGuide("완료 상태입니다. Play로 재실행할 수 있지만 쿨다운(" + cooldownMs + "ms) 중이면 잠시 후 다시 시도하세요.");
+              return;
+            }
+            setActionGuide("완료 상태입니다. Play로 다시 실행할 수 있습니다.");
+            return;
+          }
+
+          setActionGuide("현재 상태에서는 선택한 동작만 사용할 수 있습니다.");
         }
 
         function resetHeroDom() {
@@ -582,22 +631,28 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
             onPlay: function (payload) {
               const source = payload && payload.source ? payload.source : "manual";
               setStatus("[" + label + "] 재생 중 (" + source + ")");
+              syncActionUi();
             },
             onPause: function () {
               setStatus("[" + label + "] 일시정지");
+              syncActionUi();
             },
             onResume: function () {
               setStatus("[" + label + "] 재개");
+              syncActionUi();
             },
             onComplete: function (payload) {
               if (payload && payload.skipped) {
                 setStatus("[" + label + "] Skip으로 종료");
+                syncActionUi();
                 return;
               }
               setStatus("[" + label + "] 완료");
+              syncActionUi();
             },
             onCancel: function () {
               setStatus("[" + label + "] 취소됨");
+              syncActionUi();
             }
           };
         }
@@ -910,24 +965,36 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           setActivePresetButton(name);
 
           const config = selected.createConfig();
+          currentPresetMeta = {
+            label: selected.label,
+            autoStart: config.autoStart,
+            startTrigger: config.startTrigger || "immediate",
+            replayMode: config.replay && config.replay.mode ? config.replay.mode : "once",
+            cooldownMs: config.replay && typeof config.replay.cooldownMs === "number" ? config.replay.cooldownMs : 0
+          };
           window.demoTypingPlayer = window.TypingAnimationLib.create(config);
+          syncActionUi();
 
           if (config.autoStart === false) {
             setStatus("[" + selected.label + "] 준비 완료. Play 버튼을 눌러 시작하세요.");
+            syncActionUi();
             return;
           }
 
           if (config.startTrigger === "interaction") {
             setStatus("[" + selected.label + "] 대기 중: 카드 영역 클릭 시 시작");
+            syncActionUi();
             return;
           }
 
           if (config.startTrigger === "in-view") {
             setStatus("[" + selected.label + "] 대기 중: 뷰포트 진입 시 시작 (재진입 리플레이 가능)");
+            syncActionUi();
             return;
           }
 
           setStatus("[" + selected.label + "] 프리셋 적용");
+          syncActionUi();
         }
 
         presetButtons.forEach(function (button) {
@@ -941,13 +1008,23 @@ window.demoTypingPlayer = window.TypingAnimationLib.create(demoConfig);</code></
           button.addEventListener("click", function () {
             const action = button.getAttribute("data-player-action");
             const player = window.demoTypingPlayer;
-            if (!player || typeof player[action] !== "function") return;
-            player[action]();
+            if (!player || typeof player[action] !== "function") {
+              setStatus("플레이어가 준비되지 않았습니다. 프리셋을 다시 선택하세요.");
+              syncActionUi();
+              return;
+            }
+            const ok = player[action]();
+            if (!ok) {
+              setStatus("현재 상태에서는 " + (actionLabelMap[action] || action) + "를 사용할 수 없습니다.");
+              syncActionUi();
+              return;
+            }
 
             if (action === "play") setStatus("수동 제어: Play");
             if (action === "pause") setStatus("수동 제어: Pause");
             if (action === "resume") setStatus("수동 제어: Resume");
             if (action === "skip") setStatus("수동 제어: Skip");
+            syncActionUi();
           });
         });
 
